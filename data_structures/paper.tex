@@ -1,0 +1,526 @@
+\documentclass[12pt]{article}
+
+\usepackage[brazilian]{babel}
+\usepackage[utf8]{inputenc}
+
+% This first part of the file is called the PREAMBLE. It includes
+% customizations and command definitions. The preamble is everything
+% between \documentclass and \begin{document}.
+
+\usepackage[margin=1in]{geometry}  % set the margins to 1in on all sides
+\usepackage{graphicx}              % to include figures
+\usepackage{amsmath}               % great math stuff
+\usepackage{amsfonts}              % for blackboard bold, etc
+\usepackage{amsthm}                % better theorem environments
+\usepackage{framed}
+
+% various theorems, numbered by section
+
+\newtheorem{thm}{Theorem}[section]
+\newtheorem{lem}[thm]{Lemma}
+\newtheorem{prop}[thm]{Proposition}
+\newtheorem{cor}[thm]{Corollary}
+\newtheorem{conj}[thm]{Conjecture}
+\newtheorem{defi}[thm]{Definição}
+
+\DeclareMathOperator{\id}{id}
+
+\newcommand{\bd}[1]{\mathbf{#1}}  % for bolding symbols
+\newcommand{\RR}{\mathbb{R}}      % for Real numbers
+\newcommand{\ZZ}{\mathbb{Z}}      % for Integers
+\newcommand{\col}[1]{\left[\begin{matrix} #1 \end{matrix} \right]}
+\newcommand{\comb}[2]{\binom{#1^2 + #2^2}{#1+#2}}
+
+
+\begin{document}
+
+
+\nocite{*}
+
+\title{Estruturas de Dados para Séries Temporais}
+
+\maketitle
+
+\section{Introdução}
+Blah Blah sobre motivação
+\subsection{Definição do Problema}
+\subsection{Resultados Obtidos}
+\subsection{Organização da Dissertaçao}
+ 
+\section{Conceitos Básicos}
+\subsection{RMQ's 1-D}
+\subsection{Orthogonal Range Queries}
+\subsection{Trabalhos Relacionados}
+
+\section{Estruturas de Dados para Detecção de Eventos}
+
+Como dito, nesse trabalho buscá-se desenvolver estruturas
+que permitam responder consultas para os problemas de \textit{todos os pares} e \textit{inícios}.
+Como os dois problema são similares, muitas estratégias
+para o primeiro tipo de problema funcionam para o segundo através
+de simples adaptações. Sendo assim, vamos descrever e analisar
+estratégias e conceitos sobre a pespectiva do problema de 
+todos os pares e, em uma seção posterior, mostraremos como adaptar
+as estratégias.
+
+\subsection{Todos os pares}
+
+Nessa seção apresentamos diferentes estruturas
+para o problema \textit{todos os pares}, as estruturas descritas apresentam diferentes
+características em termos assintóticos. Algumas delas
+servem como baselines e ajudam a construir um melhor entendimento do problema.
+A primeira estrutura mantém todas as diferenças entre os valores 
+em listas ordenadas e responde consultas em $O(t + k)$. 
+Essa é uma estrutura bastante eficiente para responder consultas,
+porém a quantidade de informação armazenada $O(n^2)$ pode ser 
+proibitiva na prática. A segunda estrutura se baseia no conceito de RMQ apresentado,
+ela é eficiente em termos de espaço e tempo de pré-processamento
+porém responde as consultas em tempo $O(n + k)$, ou seja,
+sempre depende do tamanho da série de entrada. 
+
+Por fim, descrevemos nossa estrutura. Ela se basea
+no conceito de f-pairs e apresenta espaço e tempo esperado de 
+pré-processamento de $O(n)$ e, além disso, responde as consultas em $O(k)$.
+
+% Comentar abordagem gera : trabalhar com F-pairs em cima de estruturas consolidados como range trees, etc
+
+\subsubsection{Lista Ordenada}
+
+O pré-processamento consiste em montar $n$ listas ordenadas $L_1, L_2, \ldots, L_n$, 
+essas listas mantém pares da série inicial. Para cada par ordenado da série de entrada $(a_i, a_j)$, com $i < j$ e $a_i < a_j$,
+armazenamos a tupla $(a_j - a_i, i, j)$ na lista de índice $j - i$.
+Após todos os pares serem inseridos as listas são ordenadas de forma decrescente. A Figura~\ref{fig:exemplolista} apresenta um exemplo.
+
+\clearpage
+% inserir figura
+\begin{center}
+\begin{figure}
+\begin{framed}
+Série de Entrada: $<3, 2, 5, 8>$ \\
+$L_1: (3, 2, 3), (3, 3, 4)$ \\
+$L_2: (4, 2, 4)$ \\
+\caption{Índices começam por $1$}
+\label{fig:exemplolista}
+\end{framed}
+\end{figure}
+\end{center}
+
+
+Desta forma, para responder uma consulta $(t, d)$ simplesmente achá-se as soluções
+dentro de cada lista $L_1, L_2, \ldots, L_t$. Fixada uma lista $L_i$ é simples
+encontrar as soluções dentro dela, uma vez que os pares armazenados na mesma
+estão ordenados de forma decrescente, basta começar a iterar do início
+da lista e continuar enquanto os elementos tiverem valor maior ou igual a	$d$.
+O pseudo-código na Figura~\ref{fig:listaquery} mostra o algoritmo. Uma observação importante é 
+que o custo para achar as soluções dentro da lista $L_i$ é no máximo $k_{s_i} + 1$,
+ onde $k_{s_i}$ é a quantidade de tuplas que correspondem a soluções dentro da $L_i$. 
+
+\bigskip
+\begin{center}
+\begin{figure}
+\begin{framed}
+{\bf ListaOrdenadaQuery}$(t, d)$
+
+\hspace{1cm} {\bf For} $i \in [1, t]$
+
+\hspace{2cm} $m \leftarrow 0$
+
+\hspace{2cm} {\bf While} $m < |L_i|$ and $L_i[m][0] \ge d$
+
+\hspace{3cm} Reporte o par $(L_i[m][1], L_i[m][2])$
+
+\hspace{3cm} $m \leftarrow m + 1$
+\caption{Consulta}
+\label{fig:listaquery}
+\end{framed}
+\end{figure}
+\end{center}
+
+Com o dito, essa estratégia tem tempo de pré-processamento $O(n^2 \log n)$(ordenar uma lista de $n^2$ elementos) 
+e tempo de pesquisa de no máximo $\sum_{i = 1}^{t} k_{s_i} + 1$, ou seja, $O(k + t)$,
+onde $k$ é a quantidade de respostas a consulta $(t,d)$ feita.
+
+\subsubsection{Estrutura baseada em RMQ}
+
+Como apresentado na seção \ref{lala}, o RMQ é o problema de 
+encontrar o mínimo (máximo) de um intervalo de vetor de forma 
+eficiente. Como foi mostrado existem poderosas estruturas
+de dados que permitem responder consultas RMQ em tempo $O(1)$, a partir de um pré-processamento $O(n)$. 
+Nessa seção será apresentado um algoritmo que a partir de uma estrutura de RMQ para série
+de entrada responde consultas $(t, d)$ em $O(n + k)$. 
+
+A ideia principal do algoritmo é fixar um $a_i$ e encontrar todos os pares $(i, j)$ 
+que são solução da pesquisa, ou seja, os pares em que $a_i$ é o menor elemento. 
+Suponha que $a_m$ é o maior elemento dentro do intervalo $[i+1, i+2, \ldots, i+t]$, 
+note que se $(i, m)$ não for uma solução para pesquisa $(t, d)$ (isto é, $a_m - a_i < d$) então
+nenhum outro elemento do intervalo formará um par com $a_i$, por outro lado, se $a_m$  
+forma solução com $a_i$, podemos reportar o par $(i, m)$ e seguir recursivamente explorando os intervalos
+$[i+1, \ldots, m - 1]$ e $[m + 1, \ldots, t]$. Repare que, como a série foi
+pré-processada e existe uma estrutura de RMQ para a mesma, o elemento $a_m$
+pode ser encontrado em $O(1)$.
+
+Achar soluções a partir de um elemento fixo é fundamental para a sequência
+desse trabalho, sendo assim, o pseudo-código dessa etapa está em uma função separada chamada \verb|FindByFirst|,
+apresentada na Figura~\ref{findbyfirst}. Repare que o pseudo-código assume que há acesso global a série
+de entrada $A$ e que existe uma estrutura de RMQ para a mesma ($rmqA$). Com as mesmas
+ideias aplicadas no \verb|FindByFirst|, podemos criar uma outra versão, o \verb|FindBySecond|, que
+acha todas as soluções quando o maior elemento do par está fixado. O \verb|FindBySecond| está apresentado
+nessa seção por completude, ele só será utilizado em uma seção posterior.
+
+Finalmente, para de fato responder uma consulta, todas as soluções podem ser encontradas variando-se o 
+elemento fixado da série e usando o \verb|FindByFirst| para encontrar as soluções com
+o primeiro elemento fixado. A Figura~\ref{queryrmq} contém  o pseudo-código completo.
+
+\clearpage
+\bigskip
+\begin{figure}
+\begin{framed}
+{\bf QueryRMQ}(t, d)
+
+\hspace{1cm} {\bf For} $i \in [1, n]$:
+
+\hspace{2cm} {\bf FindByFirst}(i, i, i + t, t, d):
+\caption{Responde a uma consulta $(t,d)$ a partir de uma estrutura de RMQ.}
+\label{queryrmq}
+\end{framed}
+\end{figure}
+
+\clearpage
+\begin{figure}
+\begin{framed}
+{\bf FindByFirst}(f, s, e, t, d)
+
+\hspace{1cm} {\bf If} $e - s < 1$
+
+\hspace{2cm} return
+
+\hspace{1cm} $m \leftarrow rmqA.max(s, e)$
+
+\hspace{1cm} {\bf If} $A[m] - A[f] < d$:
+
+\hspace{2cm} return
+
+\hspace{1cm} Reporte o par $(f, m)$
+
+\hspace{1cm} {\bf FindByFirst}$(f, s, m - 1, t, d)$
+
+\hspace{1cm} {\bf FindByFirst}$(f, m + 1, e, t, d)$
+
+\caption{Acha todas as soluções a partir de um início fixo. Assume que 
+acesso global a série de entrada $A$ e a uma estrutura de RMQ para a mesma.}
+\label{findbyfirst}
+\end{framed}
+\end{figure}
+
+\clearpage
+\begin{figure}
+\begin{framed}
+{\bf FindBySecond}(f, s, e, t, d)
+
+\hspace{1cm} {\bf If} $e - s < 1$
+
+\hspace{2cm} return
+
+\hspace{1cm} $m \leftarrow rmqA.min(s, e)$
+
+\hspace{1cm} {\bf If} $A[f] - A[m] < d$:
+
+\hspace{2cm} return
+
+\hspace{1cm} Reporte o par $(m, f)$
+
+\hspace{1cm} {\bf FindBySecond}$(f, s, m - 1, t, d)$
+
+\hspace{1cm} {\bf FindBySecond}$(f, m + 1, e, t, d)$
+
+\caption{Acha todas as soluções a partir de um fim fixo. Assume que 
+acesso global a série de entrada $A$ e a uma estrutura de RMQ para a mesma.}
+\label{findbysecond}
+\end{framed}
+\end{figure}
+
+
+\begin{prop}
+O procedimento {\bf FindByFirst} tem complexidade $O(k_i)$ em tempo,
+onde $k_i$ é o número de pares da solução com $i$ como primeiro elemento.
+\end{prop}  
+\begin{proof}
+A sequência de processamento do procedimento pode ser vista
+como uma árvore binária, onde os nós internos são soluções e o único
+custo extra é inerente as folhas da árvore. Como em toda
+árvore de binária a quantidade de folhas é $O(\text{quantidade de nós internos})$,
+o resultado segue diretamente.
+\end{proof} 
+
+\begin{prop}
+O procedimento {\bf QueryRMQ} tem complexidade de $O(n + k)$,
+onde $k$ é a quantidade de pares que responde a consulta.
+\end{prop}
+
+\begin{proof}
+Segue trivialmente com o resultado anterior.
+\end{proof} 
+
+\subsubsection{F-pairs}
+
+Antes de apresentarmos a esta abordagem precisamos definir 
+o conceito de f-pairs. Os f-pairs são pares da sequência de entrada
+com características especiais, definidas abaixo. Eles são importantes pois
+a partir deles podemos responder qualquer consulta $(t, d)$ e,
+como iremos mostrar, a quantidade esperada deles é $O(n)$. 
+Abaixo definimos o que é um f-pair e apresentamos algumas de suas propriedades
+em forma de lemas.
+
+\begin{defi}
+Um f-pair é um par $(i, j)$, com $i < j$, tal que $a_i < \min_{k \in [i + 1, j]} a_k$ e $a_j > \max_{k \in [i, j -1]} a_k$.
+\end{defi}
+Para deixar clara a definição, se a série de entrada for $<2, 10, 3, 5, 8>$ (índices começando em 1) os f-pairs
+em relação à série é o conjunto $\{(1, 2); (3, 4); (3, 5); (4, 5) \}$. 
+
+\begin{lem}
+O valor de esperado da quantidade de f-pairs em uma
+série $<a_1, a_2, \ldots, a_n>$ é $O(n)$, para
+séries de entradas que são permutações aleatórias.
+\label{amountf}
+\end{lem}
+
+\begin{proof}
+Seja a $F_{(i, j)}$ uma variável aleatória indicadora que assume valor
+$1$ se $(i, j)$ é um f-pair e $0$, caso contrário. Nós estamos interessados
+em encontrar $E[\sum_{i = 1}^n \sum_{j=i + 1}^n F_{(i, j)}]$, que, pela linearidade
+do valor esperado é igual a $\sum_{i = 1}^n \sum_{j = i + 1}^n E[F_{(i, j)}]$.  
+
+Como $F_{(i, j)}$ é uma variável indicadora seu valor esperado é $Pr[F_{(i,j)} == 1]$.
+Para calcular esse valor devemos observar que para $(i, j)$ ser um f-pair, por definição,
+$a_i$ deve ser o menor elemento do intervalo $[i, j]$ e $a_j$ o maior. Como estamos
+tratando de permutações aleatórias, $a_i$ tem probabilidade de $\frac{1}{j - i + 1}$ de
+ser o menor, e, uma vez que $a_i$ é o menor, $a_j$ tem probabilidade de $\frac{1}{j - i}$ de
+ser o maior. Logo, $Pr[F_{(i, j)} == 1] = \frac{1}{(j - i + 1) (j - i)}$. Com isso podemos
+estimar o somatório original:
+
+$$\sum_{i = 1}^n \sum_{j = i + 1}^n  \frac{1}{(j - i + 1) (j - i)}$$
+
+Extendendo a série telescópica e usando o fato que o somatório da série harmônica com $n$ termos é $\theta(\log n)$, tem-se:
+
+$$\sum_{i = 1}^n \sum_{j = i + 1}^n  \frac{1}{(j - i + 1) (j - i)} = \sum_{i = 1}^n 1 - \frac{1}{n - i + 1} = n - \sum_{i = 1}^n \frac{1}{n - i + 1} = n - \theta(\log n)$$.
+
+Com isso completamos a demonstração que o valor esperado do número de f-pairs é $\theta(n)$.
+\end{proof}
+
+\begin{lem}
+O resultado vale com alta probabilidade.
+\end{lem}
+
+\begin{proof}
+Under construction.
+\end{proof}
+
+\begin{prop}
+Para qualquer série de entrada o valor esperado do número 
+de f-pairs é $\theta(n)$.
+\end{prop}
+\begin{proof}
+Basta observar que qualquer série de entrada pode ser mapeada em uma permutação
+com o mesmo número de f-pairs.
+\end{proof}
+
+O Lema~\ref{amountf} mostra que o número esperado de f-pairs não é grande.
+Como será apresentado depois os f-pairs podem ser usados para responder
+consultas $(t, d)$, sendo assim, eles precisam ser gerados e armazenados
+durante o pré-processamento. Desta forma, apresentamos o algoritmo na Figura~\ref{gemfpair} para geração
+dos f-pairs. A idéia básica do pseudo-código é que para encontrar todos os f-pairs da
+série $<a_1, a_2, \ldots, a_n>$ podemos fixar o menor elemento $a_m$ da série,
+gerar todos os f-pairs envolvendo $a_m$, e depois continuar recursivamente para as metades $[1, m - 1]$ e $[m + 1, n]$.
+
+\clearpage
+\begin{figure}
+\begin{framed}
+{\bf GemFPairs}($A$, $e$, $s$)
+
+\hspace{1cm} {\bf If} $e - s \le 1$
+
+\hspace{2cm} return
+
+\hspace{1cm} $m \leftarrow rmqA.min(s, e)$
+
+\hspace{1cm} $t \leftarrow s$
+
+\hspace{1cm} {\bf While} $t \ge m + 1$:
+
+\hspace{2cm} $t \leftarrow rmqA.min(m + 1, t)$
+
+\hspace{2cm} {\bf If} $A[m] - A[t] < d$:
+
+\hspace{3cm} break
+
+\hspace{2cm} Reporte o f-par $(m, t)$
+
+\hspace{2cm} $t \leftarrow t - 1$
+
+\hspace{1cm} {\bf GemFPairs}$(A, s, m - 1)$
+
+\hspace{1cm} {\bf GemFPairs}$(A, m + 1, e)$
+
+\caption{Gera todos os f-pairs na presentes na sequência $A$.}
+\label{gemfpair}
+\end{framed}
+\end{figure}
+
+\begin{prop}
+O algoritmo {\bf GemFPairs} tem complexidade de tempo linear na quantidade
+de f-pairs da série da A.
+\end{prop}
+
+Finalmente mostraremos como responder consultas $(t, d)$ a partir dos f-pairs.
+O resultado abaixo mostra a relação dos f-pairs com as respostas de consultas.
+
+\begin{lem}
+\label{fundamental}
+Para toda solução $(i, j)$ de uma pesquisa $(t, d)$ um dos três 
+casos abaixo é válido:
+\begin{enumerate}
+\item $(i, j)$ é um f-pair.
+\item $(i, f_j)$ é uma solução, onde $f_j$ é o final de algum f-pair.
+\item $(f_i, j)$ é uma solução, onde $f_i$ é o início de um f-pair.
+\end{enumerate}
+\end{lem}
+
+\begin{proof}
+Tome uma solução $(i, j)$, se ela for um f-pair, o resultado vale imediatamente.
+Caso contrário, existe um índice $k \in [i, j]$ tal que $a_k < a_i$ ou $a_k > a_j$.
+Suponha que $a_k < a_i$, o outro caso é análogo. Como $a_k < a_i$ o par $(k, j)$ também
+é uma solução, então basta mostrar que $k$ é o começo de um f-pair. Para isso, podemos
+supor sem perda de generalidade que $k$ é tal que $a_k$ é o menor elemento no intervalo
+$[i, j]$ e notar que o $(k, k')$ é um f-pair, onde $k'$ é o índice o maior elemento entre $k + 1$ e $j$.
+\end{proof}
+
+Com o Lema~\ref{fundamental}, podemos usar a seguinte estratégia 
+para encontrar todas as soluções para uma pesquisa $(t,d)$:
+
+\begin{enumerate}
+\item Encontrar todos os f-pairs que satisfazem a consulta 
+\item A partir dos f-pairs encontrados, gerar todas as soluções.
+\end{enumerate}
+
+Vamos nos concentrar primeiro na segunda parte, ou seja, gerar as soluções
+a partir dos f-pairs. Sendo assim, podemos assumir que temos 
+$F_{(t,d)}$, o conjunto de f-pairs que são solução para
+consulta $(t,d)$. 
+
+Sejam os conjunto $I_f = \{s_1, s_2, \ldots, s_{|F_{(t,d)}|}\}$
+e $E_f = \{e_1, e_2, \ldots, e_{|F_{(t,d)}|}\}$, respectivamente, o conjunto de inícios e fins 
+dos f-pairs em $F_{(t,d)}$. Para cada início em $I_f$ usa-se o algoritmo \verb|FindByFirst| (Figura~\ref{findbyfirst})
+apresentado para encontrar todas as suas soluções.  Note que ao final desse processamento, todas
+as soluções dos tipos $1$ e $3$ (de acordo com o lema \ref{fundamental}) já foram geradas. Para terminar
+basta encontrar as soluções do tipo $2$. Fazemos isso  a partir conjunto $E_f$, usando o algoritmo
+\verb|FindBySecond| modificado, onde, antes de gerar cada solução, ele verifica-se em um \textit{hash} se a solução
+já foi gerada. Note que da forma descrita, uma vez que temos $I_f$ e $E_f$, o número de passos para encontrar todas as soluções é $O(k)$.
+Na Figura~\ref{fpairqueryphase2} há um pseudo-código dessa etapa.
+
+\begin{figure}
+\begin{framed}
+{\bf FPairQuery\_Phase2}(A, $I_f$, $E_f$, $t$, $d$)
+
+\hspace{1cm} {\bf For} $inic \in I_f$
+
+\hspace{2cm} {\bf FindByStart}(inic, inic, inic + t)
+
+\hspace{1cm} {\bf For} $fim \in E_f$
+
+\hspace{2cm} {\bf FindByEnd}(fim, fim - t, fim)
+
+\caption{Acha todas as soluções a partir dos inícios e fins dos f-pairs.}
+\label{fpairqueryphase2}
+\end{framed}
+\end{figure}
+
+
+Nesse contexto, tudo o que falta para responder uma pesquisa $(t,d)$
+é encontrar os f-pairs que também são solução para a pesquisa. 
+Para realizar esse passo de forma eficiente os f-pairs devem
+estar dispostos de maneira adequada em um vetor de tuplas da forma $(a_j - a_i, i, j)$,
+onde $(i, j)$ é um f-pair.
+
+Precisamos de um pouco de notação para deixar clara a disposição dos f-pairs.
+Chamaremos de $F_t$ o conjunto de f-pairs $(i, j)$ tal que $j - i = t$. Agora 
+a disposição: Os primeiros $|F_1|$ elementos do vetor devem se tuplas que correspondem aos f-pairs em $F_1$,
+os próximos $|F_2|$ elementos tuplas que correspondem aos f-pairs em $F_2$ e assim por diante 
+até os últimos elementos do vetor, que devem corresponder aos elementos em $F_n$.
+Depois do vetor criado da forma estabelecida (note que é fácil modificar o 
+algoritmo de geração de f-pairs para gerar um vetor dessa forma) uma estrutura de
+RMQ deve ser criada para o vetor e as somas parcias dos valores $|F_1|, |F_2|, \ldots, |F_n|$
+devem ser armazenadas em outro vetor. 
+
+A organização descrita dos elementos é útil pois os f-pairs que podem responder uma consulta $(t,d)$ 
+estarão aglomerados nos $\sum_{i = 1}^t |F_i|$ primeiros elementos do vetor. Sendo assim,
+podemos, a partir da estrutura de RMQ, descobrir qual é o maior f-pair
+$f_m$ entre $[1, \sum_{i = 1}^t |F_i|]$. Se o maior elemento for menor que $d$ podemos
+parar a pesquisa, não há f-pairs que satisfaçam a consulta. Caso contrário, reportamos
+o par $f_m$ e processamos recursivamente $[1, m - 1]$ e $[m + 1, \sum_{i=1}^t |F_i|]$.
+
+O pseudo-codigo na Figura~\ref{fpairqueryphase1} mostra o procedimento para encontrar
+os f-pairs desejados e, por fim, a Figura~\ref{fpairquery} mostra o código completo
+para responder a consulta.
+
+\clearpage
+\begin{figure}
+\begin{framed}
+{\bf FPairQuery\_Phase1}(A, $s$, $e$, $t$, $d$)
+
+\hspace{1cm} {\bf If} $e - s < 0$
+
+\hspace{2cm} return
+
+\hspace{1cm} $m \leftarrow rmqFpair.max(s, e)$
+
+\hspace{1cm} {\bf If} $A[m] < d$:
+
+\hspace{2cm} return
+
+\hspace{1cm} $I_f \leftarrow I_f + F[m].inic$
+
+\hspace{1cm} $E_f \leftarrow E_f + F[m].fim$
+
+\hspace{1cm} {\bf FPairQuery\_Phase1}(A, $s$, $m - 1$, $t$, $d$)
+
+\hspace{1cm} {\bf FPairQuery\_Phase1}(A, $m + 1$, $e$, $t$, $d$)
+
+\caption{Acha todos os f-pairs que são solução para uma pesquisa $(t, d)$.}
+\label{fpairqueryphase1}
+\end{framed}
+\end{figure}
+
+
+\begin{figure}
+\begin{framed}
+{\bf FPairQuery}(A, $s$, $e$, $t$, $d$)
+
+\hspace{1cm} $I_f, E_f \leftarrow$ {\bf FPairQuery\_Phase1}($A$, $s$, $e$, $t$, $d$)
+
+\hspace{1cm} {\bf FPairQuery\_Phase2}($A$, $I_f$, $E_f$)
+
+\caption{Responde uma pesquisa $(t, d)$ usando o conceito de f-pairs.}
+\label{fpairquery}
+\end{framed}
+\end{figure}
+
+\begin{prop}
+O algoritmo {\bf FPairQuery} tem complexidade de tempo $O(k)$.
+\end{prop}
+
+\subsection{Inicios}
+\subsection{Extensões para outras consultas}
+ Explicar nossa abordagem e outras triviais
+
+\section{Avaliação Experimental}
+- Corpus
+- Testes realizados com análises
+
+\section{Conclusões}
+
+\bibliographystyle{plain}
+
+\bibliography{paper}
+
+
+\end{document}
