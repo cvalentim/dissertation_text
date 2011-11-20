@@ -1,6 +1,11 @@
+*.bbl
 *.out
 *.swp
 *.log
 *.pdf
 *.aux
 *.eps
+*.nav
+*.toc
+*.snm
+*.blg
