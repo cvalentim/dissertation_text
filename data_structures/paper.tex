@@ -17,10 +17,10 @@
 % various theorems, numbered by section
 
 \newtheorem{thm}{Theorem}[section]
-\newtheorem{lem}[thm]{Lemma}
-\newtheorem{prop}[thm]{Proposition}
-\newtheorem{cor}[thm]{Corollary}
-\newtheorem{conj}[thm]{Conjecture}
+\newtheorem{lem}[thm]{Lema}
+\newtheorem{prop}[thm]{Proposição}
+\newtheorem{cor}[thm]{Corolario}
+\newtheorem{conj}[thm]{Conjectura}
 \newtheorem{defi}[thm]{Definição}
 
 \DeclareMathOperator{\id}{id}
@@ -54,7 +54,7 @@ Blah Blah sobre motivação
 
 \section{Estruturas de Dados para Detecção de Eventos}
 
-Como dito, nesse trabalho buscá-se desenvolver estruturas
+Como explicado, nesse trabalho buscá-se desenvolver estruturas
 que permitam responder consultas para os problemas de \textit{todos os pares} e \textit{inícios}.
 Como os dois problema são similares, muitas estratégias
 para o primeiro tipo de problema funcionam para o segundo através
@@ -98,7 +98,7 @@ Após todos os pares serem inseridos as listas são ordenadas de forma decrescen
 \begin{framed}
 Série de Entrada: $<3, 2, 5, 8>$ \\
 $L_1: (3, 2, 3), (3, 3, 4)$ \\
-$L_2: (4, 2, 4)$ \\
+$L_2: (6, 2, 4)$ \\
 \caption{Índices começam por $1$}
 \label{fig:exemplolista}
 \end{framed}
@@ -136,7 +136,7 @@ que o custo para achar as soluções dentro da lista $L_i$ é no máximo $k_{s_i
 \end{figure}
 \end{center}
 
-Com o dito, essa estratégia tem tempo de pré-processamento $O(n^2 \log n)$(ordenar uma lista de $n^2$ elementos) 
+Com o mencionado, essa estratégia tem tempo de pré-processamento $O(n^2 \log n)$(ordenar uma lista de $n^2$ elementos) 
 e tempo de pesquisa de no máximo $\sum_{i = 1}^{t} k_{s_i} + 1$, ou seja, $O(k + t)$,
 onde $k$ é a quantidade de respostas a consulta $(t,d)$ feita.
 
@@ -171,7 +171,6 @@ Finalmente, para de fato responder uma consulta, todas as soluções podem ser e
 elemento fixado da série e usando o \verb|FindByFirst| para encontrar as soluções com
 o primeiro elemento fixado. A Figura~\ref{queryrmq} contém  o pseudo-código completo.
 
-\clearpage
 \bigskip
 \begin{figure}
 \begin{framed}
@@ -212,7 +211,6 @@ acesso global a série de entrada $A$ e a uma estrutura de RMQ para a mesma.}
 \end{framed}
 \end{figure}
 
-\clearpage
 \begin{figure}
 \begin{framed}
 {\bf FindBySecond}(f, s, e, t, d)
@@ -246,9 +244,9 @@ onde $k_i$ é o número de pares da solução com $i$ como primeiro elemento.
 \end{prop}  
 \begin{proof}
 A sequência de processamento do procedimento pode ser vista
-como uma árvore binária, onde os nós internos são soluções e o único
+como uma árvore estritamente binária, onde os nós internos são soluções e o único
 custo extra é inerente as folhas da árvore. Como em toda
-árvore de binária a quantidade de folhas é $O(\text{quantidade de nós internos})$,
+árvore estritamente binária a quantidade de folhas é igual a $\text{quantidade de nós internos} + 1$,
 o resultado segue diretamente.
 \end{proof} 
 
@@ -278,9 +276,9 @@ Para deixar clara a definição, se a série de entrada for $<2, 10, 3, 5, 8>$ (
 em relação à série é o conjunto $\{(1, 2); (3, 4); (3, 5); (4, 5) \}$. 
 
 \begin{lem}
-O valor de esperado da quantidade de f-pairs em uma
-série $<a_1, a_2, \ldots, a_n>$ é $O(n)$, para
-séries de entradas que são permutações aleatórias.
+O valor esperado da quantidade de f-pairs em uma
+permutação aleatória $<a_1, a_2, \ldots, a_n>$ é $n - H_n$, onde
+$H_n$ é a soma dos $n$ primeiros termos da série harmônica.
 \label{amountf}
 \end{lem}
 
@@ -300,11 +298,11 @@ estimar o somatório original:
 
 $$\sum_{i = 1}^n \sum_{j = i + 1}^n  \frac{1}{(j - i + 1) (j - i)}$$
 
-Extendendo a série telescópica e usando o fato que o somatório da série harmônica com $n$ termos é $\theta(\log n)$, tem-se:
+Extendendo a série telescópica, tem-se:
 
-$$\sum_{i = 1}^n \sum_{j = i + 1}^n  \frac{1}{(j - i + 1) (j - i)} = \sum_{i = 1}^n 1 - \frac{1}{n - i + 1} = n - \sum_{i = 1}^n \frac{1}{n - i + 1} = n - \theta(\log n)$$.
+$$\sum_{i = 1}^n \sum_{j = i + 1}^n  \frac{1}{(j - i + 1) (j - i)} = \sum_{i = 1}^n \sum_{j = i + 1}^n  \frac{1}{(j - i)} - \frac{1}{(j - i + 1)} = \sum_{i = 1}^n 1 - \frac{1}{n - i + 1} = n - H_n $$
 
-Com isso completamos a demonstração que o valor esperado do número de f-pairs é $\theta(n)$.
+Com isso completamos a demonstração que o valor esperado do número de f-pairs é $n - H_n$.
 \end{proof}
 
 \begin{lem}
@@ -313,15 +311,6 @@ O resultado vale com alta probabilidade.
 
 \begin{proof}
 Under construction.
-\end{proof}
-
-\begin{prop}
-Para qualquer série de entrada o valor esperado do número 
-de f-pairs é $\theta(n)$.
-\end{prop}
-\begin{proof}
-Basta observar que qualquer série de entrada pode ser mapeada em uma permutação
-com o mesmo número de f-pairs.
 \end{proof}
 
 O Lema~\ref{amountf} mostra que o número esperado de f-pairs não é grande.
@@ -335,7 +324,7 @@ gerar todos os f-pairs envolvendo $a_m$, e depois continuar recursivamente para 
 \clearpage
 \begin{figure}
 \begin{framed}
-{\bf GemFPairs}($A$, $e$, $s$)
+{\bf GenFPairs}($A$, $e$, $s$)
 
 \hspace{1cm} {\bf If} $e - s \le 1$
 
@@ -357,9 +346,9 @@ gerar todos os f-pairs envolvendo $a_m$, e depois continuar recursivamente para 
 
 \hspace{2cm} $t \leftarrow t - 1$
 
-\hspace{1cm} {\bf GemFPairs}$(A, s, m - 1)$
+\hspace{1cm} {\bf GenFPairs}$(A, s, m - 1)$
 
-\hspace{1cm} {\bf GemFPairs}$(A, m + 1, e)$
+\hspace{1cm} {\bf GenFPairs}$(A, m + 1, e)$
 
 \caption{Gera todos os f-pairs na presentes na sequência $A$.}
 \label{gemfpair}
@@ -367,7 +356,7 @@ gerar todos os f-pairs envolvendo $a_m$, e depois continuar recursivamente para 
 \end{figure}
 
 \begin{prop}
-O algoritmo {\bf GemFPairs} tem complexidade de tempo linear na quantidade
+O algoritmo {\bf GenFPairs} tem complexidade de tempo linear na quantidade
 de f-pairs da série da A.
 \end{prop}
 
@@ -407,14 +396,20 @@ a partir dos f-pairs. Sendo assim, podemos assumir que temos
 $F_{(t,d)}$, o conjunto de f-pairs que são solução para
 consulta $(t,d)$. 
 
-Sejam os conjunto $I_f = \{s_1, s_2, \ldots, s_{|F_{(t,d)}|}\}$
-e $E_f = \{e_1, e_2, \ldots, e_{|F_{(t,d)}|}\}$, respectivamente, o conjunto de inícios e fins 
+Sejam os conjunto $I_f = \{s_1, s_2, \ldots, s_{m_s}\}$
+e $E_f = \{e_1, e_2, \ldots, e_{m_e}\}$, respectivamente, o conjunto de inícios e fins distintos
 dos f-pairs em $F_{(t,d)}$. Para cada início em $I_f$ usa-se o algoritmo \verb|FindByFirst| (Figura~\ref{findbyfirst})
 apresentado para encontrar todas as suas soluções.  Note que ao final desse processamento, todas
 as soluções dos tipos $1$ e $3$ (de acordo com o lema \ref{fundamental}) já foram geradas. Para terminar
 basta encontrar as soluções do tipo $2$. Fazemos isso  a partir conjunto $E_f$, usando o algoritmo
-\verb|FindBySecond| modificado, onde, antes de gerar cada solução, ele verifica-se em um \textit{hash} se a solução
-já foi gerada. Note que da forma descrita, uma vez que temos $I_f$ e $E_f$, o número de passos para encontrar todas as soluções é $O(k)$.
+\verb|FindBySecond| modificado, onde, antes de gerar cada solução, ele verifica em um \textit{hash} se a solução
+já foi gerada. O hash neste caso é simples, uma vez que os inícios são processados primeiro, todos os
+f-pairs que têm como início um elemento do conjunto $I_f$ já foram gerados, sendo assim, no \verb|FindBySecond|,
+para saber se uma solução já foi gerada, basta verificar se o início dela faz parte do conjunto $I_f$, ou seja,
+o hash é apenas um vetor com os inicíos em $I_f$ marcados.
+
+Note que da forma descrita, uma vez que temos $I_f$ e $E_f$, o número de passos para encontrar todas as soluções é $O(k)$.
+Além disso, note que uma solução é processada no máximo duas vezes (uma a partir do conjunto $I_f$ e outra pelo conjunto $E_f$).
 Na Figura~\ref{fpairqueryphase2} há um pseudo-código dessa etapa.
 
 \begin{figure}
@@ -454,8 +449,8 @@ devem ser armazenadas em outro vetor.
 A organização descrita dos elementos é útil pois os f-pairs que podem responder uma consulta $(t,d)$ 
 estarão aglomerados nos $\sum_{i = 1}^t |F_i|$ primeiros elementos do vetor. Sendo assim,
 podemos, a partir da estrutura de RMQ, descobrir qual é o maior f-pair
-$f_m$ entre $[1, \sum_{i = 1}^t |F_i|]$. Se o maior elemento for menor que $d$ podemos
-parar a pesquisa, não há f-pairs que satisfaçam a consulta. Caso contrário, reportamos
+$f_m$ entre $[1, \sum_{i = 1}^t |F_i|]$ (note que o maior f-pair $(i, j)$ é o que maximiza $a_j - a_i$).
+Se o maior elemento for menor que $d$ podemos parar a pesquisa, não há f-pairs que satisfaçam a consulta. Caso contrário, reportamos
 o par $f_m$ e processamos recursivamente $[1, m - 1]$ e $[m + 1, \sum_{i=1}^t |F_i|]$.
 
 O pseudo-codigo na Figura~\ref{fpairqueryphase1} mostra o procedimento para encontrar
