@@ -13,6 +13,8 @@
 \usepackage{amsfonts}              % for blackboard bold, etc
 \usepackage{amsthm}                % better theorem environments
 \usepackage{framed}
+\usepackage{epstopdf}
+\usepackage{multirow}
 
 % various theorems, numbered by section
 
@@ -34,7 +36,6 @@
 
 \begin{document}
 
-
 \nocite{*}
 
 \title{Estruturas de Dados para Séries Temporais}
@@ -54,8 +55,8 @@ Blah Blah sobre motivação
 
 \section{Estruturas de Dados para Detecção de Eventos}
 
-Como explicado, nesse trabalho buscá-se desenvolver estruturas
-que permitam responder consultas para os problemas de \textit{todos os pares} e \textit{inícios}.
+Como explicado, nesse trabalho desenvolvemos estruturas
+que permitem responder consultas para os problemas de \textit{todos os pares} e \textit{inícios}.
 Como os dois problema são similares, muitas estratégias
 para o primeiro tipo de problema funcionam para o segundo através
 de simples adaptações. Sendo assim, vamos descrever e analisar
@@ -67,10 +68,10 @@ as estratégias.
 
 Nessa seção apresentamos diferentes estruturas
 para o problema \textit{todos os pares}, as estruturas descritas apresentam diferentes
-características em termos assintóticos. Algumas delas
+características em termos de complexidade assintótica. Algumas delas
 servem como baselines e ajudam a construir um melhor entendimento do problema.
 A primeira estrutura mantém todas as diferenças entre os valores 
-em listas ordenadas e responde consultas em $O(t + k)$. 
+em listas ordenadas e responde consultas $(t, d)$ em $O(t + k)$. 
 Essa é uma estrutura bastante eficiente para responder consultas,
 porém a quantidade de informação armazenada $O(n^2)$ pode ser 
 proibitiva na prática. A segunda estrutura se baseia no conceito de RMQ apresentado,
@@ -90,22 +91,6 @@ O pré-processamento consiste em montar $n$ listas ordenadas $L_1, L_2, \ldots, 
 essas listas mantém pares da série inicial. Para cada par ordenado da série de entrada $(a_i, a_j)$, com $i < j$ e $a_i < a_j$,
 armazenamos a tupla $(a_j - a_i, i, j)$ na lista de índice $j - i$.
 Após todos os pares serem inseridos as listas são ordenadas de forma decrescente. A Figura~\ref{fig:exemplolista} apresenta um exemplo.
-
-\clearpage
-% inserir figura
-\begin{center}
-\begin{figure}
-\begin{framed}
-Série de Entrada: $<3, 2, 5, 8>$ \\
-$L_1: (3, 2, 3), (3, 3, 4)$ \\
-$L_2: (6, 2, 4)$ \\
-\caption{Índices começam por $1$}
-\label{fig:exemplolista}
-\end{framed}
-\end{figure}
-\end{center}
-
-
 Desta forma, para responder uma consulta $(t, d)$ simplesmente achá-se as soluções
 dentro de cada lista $L_1, L_2, \ldots, L_t$. Fixada uma lista $L_i$ é simples
 encontrar as soluções dentro dela, uma vez que os pares armazenados na mesma
@@ -115,10 +100,25 @@ O pseudo-código na Figura~\ref{fig:listaquery} mostra o algoritmo. Uma observa�
 que o custo para achar as soluções dentro da lista $L_i$ é no máximo $k_{s_i} + 1$,
  onde $k_{s_i}$ é a quantidade de tuplas que correspondem a soluções dentro da $L_i$. 
 
-\bigskip
+% inserir figura
 \begin{center}
 \begin{figure}
 \begin{framed}
+Série de Entrada: $<3, 2, 5, 8>$ \\
+$L_1: (3, 2, 3), (3, 3, 4)$ \\
+$L_2: (6, 2, 4)$ \\
+\end{framed}
+\label{fig:exemplolista}
+\caption{Índices começam por $1$}
+\end{figure}
+\end{center}
+
+
+
+\begin{center}
+\begin{figure}
+\begin{framed}
+
 {\bf ListaOrdenadaQuery}$(t, d)$
 
 \hspace{1cm} {\bf For} $i \in [1, t]$
@@ -130,9 +130,9 @@ que o custo para achar as soluções dentro da lista $L_i$ é no máximo $k_{s_i
 \hspace{3cm} Reporte o par $(L_i[m][1], L_i[m][2])$
 
 \hspace{3cm} $m \leftarrow m + 1$
-\caption{Consulta}
-\label{fig:listaquery}
 \end{framed}
+\label{fig:listaquery}
+\caption{Consulta}
 \end{figure}
 \end{center}
 
@@ -149,7 +149,7 @@ de dados que permitem responder consultas RMQ em tempo $O(1)$, a partir de um pr
 Nessa seção será apresentado um algoritmo que a partir de uma estrutura de RMQ para série
 de entrada responde consultas $(t, d)$ em $O(n + k)$. 
 
-A ideia principal do algoritmo é fixar um $a_i$ e encontrar todos os pares $(i, j)$ 
+A ideia principal do algoritmo é fixar um $i$ e encontrar todos os pares $(i, j)$ 
 que são solução da pesquisa, ou seja, os pares em que $a_i$ é o menor elemento. 
 Suponha que $a_m$ é o maior elemento dentro do intervalo $[i+1, i+2, \ldots, i+t]$, 
 note que se $(i, m)$ não for uma solução para pesquisa $(t, d)$ (isto é, $a_m - a_i < d$) então
@@ -171,7 +171,6 @@ Finalmente, para de fato responder uma consulta, todas as soluções podem ser e
 elemento fixado da série e usando o \verb|FindByFirst| para encontrar as soluções com
 o primeiro elemento fixado. A Figura~\ref{queryrmq} contém  o pseudo-código completo.
 
-\bigskip
 \begin{figure}
 \begin{framed}
 {\bf QueryRMQ}(t, d)
@@ -179,9 +178,9 @@ o primeiro elemento fixado. A Figura~\ref{queryrmq} contém  o pseudo-código co
 \hspace{1cm} {\bf For} $i \in [1, n]$:
 
 \hspace{2cm} {\bf FindByFirst}(i, i, i + t, t, d):
-\caption{Responde a uma consulta $(t,d)$ a partir de uma estrutura de RMQ.}
-\label{queryrmq}
 \end{framed}
+\label{queryrmq}
+\caption{Responde a uma consulta $(t,d)$ a partir de uma estrutura de RMQ.}
 \end{figure}
 
 \clearpage
@@ -205,10 +204,10 @@ o primeiro elemento fixado. A Figura~\ref{queryrmq} contém  o pseudo-código co
 
 \hspace{1cm} {\bf FindByFirst}$(f, m + 1, e, t, d)$
 
+\end{framed}
 \caption{Acha todas as soluções a partir de um início fixo. Assume que 
 acesso global a série de entrada $A$ e a uma estrutura de RMQ para a mesma.}
 \label{findbyfirst}
-\end{framed}
 \end{figure}
 
 \begin{figure}
@@ -231,10 +230,10 @@ acesso global a série de entrada $A$ e a uma estrutura de RMQ para a mesma.}
 
 \hspace{1cm} {\bf FindBySecond}$(f, m + 1, e, t, d)$
 
+\end{framed}
 \caption{Acha todas as soluções a partir de um fim fixo. Assume que 
 acesso global a série de entrada $A$ e a uma estrutura de RMQ para a mesma.}
 \label{findbysecond}
-\end{framed}
 \end{figure}
 
 
@@ -261,7 +260,7 @@ Segue trivialmente com o resultado anterior.
 
 \subsubsection{F-pairs}
 
-Antes de apresentarmos a esta abordagem precisamos definir 
+Antes de apresentarmos a nossa abordagem precisamos definir 
 o conceito de f-pairs. Os f-pairs são pares da sequência de entrada
 com características especiais, definidas abaixo. Eles são importantes pois
 a partir deles podemos responder qualquer consulta $(t, d)$ e,
@@ -313,8 +312,11 @@ O resultado vale com alta probabilidade.
 Under construction.
 \end{proof}
 
-O Lema~\ref{amountf} mostra que o número esperado de f-pairs não é grande.
-Como será apresentado depois os f-pairs podem ser usados para responder
+Note que o lema trata de permutações aleatórias, porém, qualquer série
+pode ser mapeada em uma permutação com exatamente o mesmo número de f-pairs,
+uma vez a definição de f-pair só utiliza o tamanho relativo dos elementos.
+Desta forma, o Lema~\ref{amountf} mostra que o número esperado de f-pairs não é grande
+para qualquer possível série de entrada. Como será apresentado posteriormente os f-pairs podem ser usados para responder
 consultas $(t, d)$, sendo assim, eles precisam ser gerados e armazenados
 durante o pré-processamento. Desta forma, apresentamos o algoritmo na Figura~\ref{gemfpair} para geração
 dos f-pairs. A idéia básica do pseudo-código é que para encontrar todos os f-pairs da
@@ -350,9 +352,9 @@ gerar todos os f-pairs envolvendo $a_m$, e depois continuar recursivamente para 
 
 \hspace{1cm} {\bf GenFPairs}$(A, m + 1, e)$
 
+\end{framed}
 \caption{Gera todos os f-pairs na presentes na sequência $A$.}
 \label{gemfpair}
-\end{framed}
 \end{figure}
 
 \begin{prop}
@@ -369,8 +371,8 @@ Para toda solução $(i, j)$ de uma pesquisa $(t, d)$ um dos três
 casos abaixo é válido:
 \begin{enumerate}
 \item $(i, j)$ é um f-pair.
-\item $(i, f_j)$ é uma solução, onde $f_j$ é o final de algum f-pair.
-\item $(f_i, j)$ é uma solução, onde $f_i$ é o início de um f-pair.
+\item $i$ é o início de um f-pair.
+\item $j$ é o fim de um f-pair.
 \end{enumerate}
 \end{lem}
 
@@ -380,7 +382,7 @@ Caso contrário, existe um índice $k \in [i, j]$ tal que $a_k < a_i$ ou $a_k > 
 Suponha que $a_k < a_i$, o outro caso é análogo. Como $a_k < a_i$ o par $(k, j)$ também
 é uma solução, então basta mostrar que $k$ é o começo de um f-pair. Para isso, podemos
 supor sem perda de generalidade que $k$ é tal que $a_k$ é o menor elemento no intervalo
-$[i, j]$ e notar que o $(k, k')$ é um f-pair, onde $k'$ é o índice o maior elemento entre $k + 1$ e $j$.
+$[i, j]$ e notar que o $(k, k')$ é um f-pair, onde $k'$ é o índice do maior elemento entre $k + 1$ e $j$.
 \end{proof}
 
 Com o Lema~\ref{fundamental}, podemos usar a seguinte estratégia 
@@ -424,9 +426,9 @@ Na Figura~\ref{fpairqueryphase2} há um pseudo-código dessa etapa.
 
 \hspace{2cm} {\bf FindByEnd}(fim, fim - t, fim)
 
+\end{framed}
 \caption{Acha todas as soluções a partir dos inícios e fins dos f-pairs.}
 \label{fpairqueryphase2}
-\end{framed}
 \end{figure}
 
 
@@ -443,7 +445,7 @@ os próximos $|F_2|$ elementos tuplas que correspondem aos f-pairs em $F_2$ e as
 até os últimos elementos do vetor, que devem corresponder aos elementos em $F_n$.
 Depois do vetor criado da forma estabelecida (note que é fácil modificar o 
 algoritmo de geração de f-pairs para gerar um vetor dessa forma) uma estrutura de
-RMQ deve ser criada para o vetor e as somas parcias dos valores $|F_1|, |F_2|, \ldots, |F_n|$
+RMQ deve ser criada para o vetor e as somas parciais dos valores $|F_1|, |F_2|, \ldots, |F_n|$
 devem ser armazenadas em outro vetor. 
 
 A organização descrita dos elementos é útil pois os f-pairs que podem responder uma consulta $(t,d)$ 
@@ -452,10 +454,27 @@ podemos, a partir da estrutura de RMQ, descobrir qual é o maior f-pair
 $f_m$ entre $[1, \sum_{i = 1}^t |F_i|]$ (note que o maior f-pair $(i, j)$ é o que maximiza $a_j - a_i$).
 Se o maior elemento for menor que $d$ podemos parar a pesquisa, não há f-pairs que satisfaçam a consulta. Caso contrário, reportamos
 o par $f_m$ e processamos recursivamente $[1, m - 1]$ e $[m + 1, \sum_{i=1}^t |F_i|]$.
-
 O pseudo-codigo na Figura~\ref{fpairqueryphase1} mostra o procedimento para encontrar
 os f-pairs desejados e, por fim, a Figura~\ref{fpairquery} mostra o código completo
 para responder a consulta.
+
+De forma resumida, abaixo temos os componentes que consistuem a estrutura e
+o espaço utilizado por cada um deles, assumindo que a implementação de rmq será a \verb|rmqBucket|.
+
+\begin{center}
+\begin{itemize}
+\item Série de entrada, espaço $n$.
+\item Vetor com pares $(a_j - a_i, i)$ para cada f-pair $(i, j)$, espaço $2f$, onde $f$ é o total de f-pairs.
+\item Vetor de tamanho $n$ que guarda as somas parciais de $|F_1|, |F_2|, \ldots, |F_n|$, espaço $n$.
+\item Estrutura de RMQ para o vetor de pares $(a_j - a_i, i)$, espaço $8f$.
+\item Duas estruturas de RMQ (uma de mínimo e outra de máximo) sobre os valores da série de entrada, espaço $2\times4n$.
+\item Dois vetores de tamanho $n$ usados como $hash$ para os inícios e fins já vistos durante uma consulta, espaço $2n$.
+\end{itemize}
+\end{center}
+
+Desta forma, o espaço total consumido pela estrutura é $n + 2f + n + 8f + 8n + 2n = 10f + 11n$. Sendo assim, 
+o espaço esperado é $22n$.
+
 
 \clearpage
 \begin{figure}
@@ -480,9 +499,9 @@ para responder a consulta.
 
 \hspace{1cm} {\bf FPairQuery\_Phase1}(A, $m + 1$, $e$, $t$, $d$)
 
+\end{framed}
 \caption{Acha todos os f-pairs que são solução para uma pesquisa $(t, d)$.}
 \label{fpairqueryphase1}
-\end{framed}
 \end{figure}
 
 
@@ -493,29 +512,565 @@ para responder a consulta.
 \hspace{1cm} $I_f, E_f \leftarrow$ {\bf FPairQuery\_Phase1}($A$, $s$, $e$, $t$, $d$)
 
 \hspace{1cm} {\bf FPairQuery\_Phase2}($A$, $I_f$, $E_f$)
-
+\end{framed}
 \caption{Responde uma pesquisa $(t, d)$ usando o conceito de f-pairs.}
 \label{fpairquery}
-\end{framed}
 \end{figure}
 
 \begin{prop}
 O algoritmo {\bf FPairQuery} tem complexidade de tempo $O(k)$.
 \end{prop}
 
-\subsection{Inicios}
+\subsection{Inícios}
+
+Nessa seção apresentamos as estruturas desenvolvidas para o problema \textit{inicios}.
+Relembrando que essa problema é parecido com o \textit{todos os pares}, exceto que a
+resposta para uma consulta são apenas os inícios dos pares que respondem a mesma. Isso
+muda significatemente o problema, uma vez que no primeiro problema, \textit{todos os pares},
+o tamanho da saída varia de $0$ até $n(n-1)/2 = O(n^2)$, enquanto neste varia de $0$ até $n$.
+
+A primeira estrutura que apresentamos é uma variação bem simples da estrutura baseada
+em RMQ descrita para o problema de todos os pares, ela tem tempo e espaço de pré-processamento
+linear, se utilizada uma estrutura de RMQ adequada, e tempo de consulta $\theta(n)$. Já
+a segunda estrutura apresentada se basea no conceito de f-pairs.
+
+\subsection{Estrutura Baseada em RMQ}
+
+O pré-processamento dessa estratégia consiste em criar uma estrutura de RMQ (máximo)
+para a série. Para responder uma consulta $(t, d)$, simplesmente iteramos sobre todos
+os inícios possíveis e verificamos em $O(1)$ se ele é ou não uma resposta para consulta.
+Para fazer isso, basta notar que fixado um início $i$, podemos encontrar o elemento de maior valor
+no intervalo $[i + 1, i + t]$ e verificar se ele forma um par com elemento $i$.
+ Como a existe uma estrutura de RMQ para série, o elemento de maior valor
+pode ser encontrado em $O(1)$.
+
+
+\subsection{Estrutura Baseada em F-Pairs}
+
+Essa estrutura busca extender a ideia dos f-pairs para o problema dos inícios.
+O pré-processamento consiste em gerar todos os f-pairs da série e armazená-los
+em uma Orthogonal Range Tree. O processo para gerar de forma eficiente os f-pairs é o mesmo
+descrito para o problema de todos os pares na Figura~\ref{gemfpair}. Para cada 
+f-pair $(i, j)$ criamos uma tupla $(j, a_j - a_i, j - i)$ na Orthogonal Range Tree.
+
+No processo de resposta a consulta, recuperamos o conjunto $E_f$, o mesmo
+conjunto definido na seção~\ref{lala}, isto é, o conjunto dos fins de f-pairs que
+respondem a consulta $(t, d)$ dada. Para encontrar o conjunto $E_f$ fazemos consultas a
+Range Tree. A primeira consulta é dá forma $x_1 \ge 0,  x_2 \ge d,  x_3 \ge 0, x_3 \le t$, se não
+houver resposta para essa consulta significa que não há f-pair que satisfaça a consulta $(t,d)$.
+Por outro lado, se existir uma solução, digamos, uma tupla $(j, \delta d, \delta t)$, então
+podemos adicionar o fim $j$ ao conjunto $E_f$, e, recursivamente, explorar as regiões $[0, j - 1]$ e $[j + 1, n]$.
+Isto é feito novamente com as pesquisas $x_1 \ge 0, x_1 \le j, x_2 \ge d, x_3 \ge 0, x_3 \le t$ e 
+$x_1 > j, x_1 \le n, x_2 \ge d, x_3 \ge 0, x_3 \le t$ e, para cada resultado dessas pesquisas, repete-se
+o mesmo processo. Note que a cada pesquisa, como limitamos a primeira coordenada de forma adequada, um 
+mesmo fim não se repete. Na Figura~\ref{fpairinicqueryphase1} apresentamos o pseudo-código para esse procedimento.
+A complexidade de tempo desta fase é $|E_f| \log^2 |E_f|$.
+
+\begin{figure}
+\begin{framed}
+{\bf FPairInicQuery\_Phase1}(RS, s, e)
+
+\hspace{1cm} {\bf If } $s > e$:
+
+\hspace{2cm} {\bf Return}
+
+\hspace{1cm} $(j, \delta d, \delta t) \leftarrow $ RS.query($x_1 \ge s,  x_1 \le e,  x_2 \ge d,  x_3 \ge 0, x_3 \le t$)
+
+\hspace{1cm} {\bf If} $(j, \delta d, \delta t)$ is NULL
+
+\hspace{2cm} {\bf Return}
+
+\hspace{1cm} $E_f \leftarrow E_f + j$
+
+\hspace{1cm} {\bf FPairInicQuery}(RS, $s$, $j - 1$)
+
+\hspace{1cm} {\bf FPairInicQuery}(RS, $j + 1$, $e$)
+
+\end{framed}
+\caption{Acha o conjunto de fins $E_f$.}
+\label{fpairinicqueryphase1}
+\end{figure}
+
+
+
+
+Com o conjunto de fins $E_f$, precisamos gerar os inícios para de fato responder as consultas.
+Uma forma simples de gerar os inícios seria, para cada fim em $E_f$, utilizar o algoritmo \verb|FindBySecond| para 
+gerar os pares que são solução para consulta, e, para cada par $(i, j)$ gerado,
+verificar em um \textit{hash} se o início $i$ já foi reportado, e, caso não tenha sido, 
+reportá-lo e marcá-lo na hash. O problema desse algoritmo é que ele irá visitar todos
+pares que são solução para pesquisa $(t, d)$ e, como a quantidade total desses pares 
+pode ser quadrática no tamanho da série, o algoritmo não é eficiente. Abaixo
+descrevemos duas formam que evitam processar um mesmo início mais de uma vez.
+
+Uma forma mais eficiente de reportar os inícios a partir do conjunto $E_f$ é 
+ordená-los de forma decrescente por valor e processá-los nessa ordem. Suponha que encontramos
+todos os inícios que foram par com o fim $i$, e agora queremos encontrar
+os inícios que formam par com um fim $j$ de valor menor que $i$ ($e_i > e_J$),
+uma observação importante é que não precisamos buscar na região $[i - t, i]$, pois,
+se algum início dessa região formar um par com $j$ ele também forma um par com $i$, e,
+sendo assim, já foi reportado. De forma geral, se os fins forem processados em 
+ordem decrescente por valor, para cada novo fim na iteração só precisamos buscar novos
+inícios em regiões que não foram cobertas por fins processados antes. Na Figura~\ref{fpairinicqueryphase2}
+há o pseudo-código dessa etapa. 
+
+\begin{figure}
+\begin{framed}
+{\bf FPairInicQuery\_Phase2}(A, $E_f$)
+
+\hspace{1cm} Ordene $E_f$ de forma descrescente por valor
+
+\hspace{1cm} Crie uma árvore binária de busca BST
+
+\hspace{1cm} \textbf{For} $fim \in E_f$
+
+\hspace{2cm} prev $\leftarrow $ BST.prev(fim)
+
+\hspace{2cm} suc $\leftarrow $ BST.suc(fim)
+
+\hspace{2cm} BST.add(fim)
+
+\hspace{2cm} $s \leftarrow \max\{fim - t, \text{prev}\}$ 
+
+\hspace{2cm} $e \leftarrow \min\{fim, \text{suc} - t \}$ 
+
+\hspace{2cm} {\bf FindBySecond}$(f, s, e, t, d)$
+
+\end{framed}
+\caption{Acha todos os inicios a partir do conjunto de fins $E_f$ .}
+\label{fpairinicqueryphase2}
+\end{figure}
+
+Note que o algoritmo acima processa cada início exatamente uma vez.
+Sendo assim, o total de operações realizadas por chamadas ao {\bf FindBySecond}
+é limitado pelo número de ínicios. Por outro lado, para cada fim em $E_f$ fazemos
+duas buscas e uma inserção em um árvore binária de busca, se está árvore for balanceada (AVL, RedBlack, etc.),
+ o custo de cada uma dessas operações é $\theta(\log n)$. Desta forma, o tempo gasto por esta fase é da ordem $O(k + |E_f|\log |E_f|)$,
+ onde $k$ é o total de respostas (inícios) a consulta $(t, d)$ feita.
+
+Contudo, existe outra forma mais eficiente de recuperar os inícios a partir do conjunto
+$E_f$. Se ordenarmos o conjunto $E_f$ de forma decrescente por índice, ou seja, fins mais a direita
+ficam na frente do vetor, podemos achar os .....
+
+%\begin{figure}
+%\begin{framed}
+%{\bf FPairInicQuery\_Phase2}(A, $E_f$)
+
+%\hspace{1cm} Ordene $E_f$ de forma decrescente por índice
+
+%\hspace{1cm} Crie uma pilha P 
+
+%\hspace{1cm} {\bf For} $fim \in E_f$
+
+%\hspace{2cm} {\bf If} P é vazia
+
+%\hspace{3cm}  P.push((A[f], fim, fim -t))
+
+%\hspace{3cm}  continue
+
+%\hspace{2cm}  {\bf If} P.top()[0] < A[fim]
+
+%\hspace{3cm}  (f, e, s) $\leftarrow$ P.pop()
+
+%\hspace{3cm}  \verb|FindByEnd|(f, e, s)
+%
+%\hspace{3cm}  P.push((fim, fim - t, 
+
+%\end{framed}
+%\caption{Acha todos os inicios a partir do conjunto de fins $E_f$ .}
+%\label{fpairinicqueryphase2}
+%\end{figure}
+
+
 \subsection{Extensões para outras consultas}
  Explicar nossa abordagem e outras triviais
 
 \section{Avaliação Experimental}
-- Corpus
-- Testes realizados com análises
 
+Nessa seção buscamos avaliar as estruturas propostas sobre o enfoque experimental.
+ Mantendo a linha das outras seções, iremos primeiros descrever os experimentos para o problema de \textit{todos os pares}
+e então seguir para o problema \textit{inícios}.
+
+\subsection{Corpus}
+
+Dois conjuntos de séries foram utilizadas durante os experimentos. 
+O primeiro conjunto é formado por $5$ permutações geradas aleatoriamente, de tamanhos $1$MB, $2$MB, $3$MB, $4$MB, $5$MB.
+Já o segundo conjunto é formado por $6$ séries reais advindas do mercado financeiro,
+ com tamanhos especificados na Figura~\ref{tamanho-series}.
+
+%\begin{figure}
+%\begin{center}
+%\begin{tabular}{|c|c|c|c|c|c|c|}
+%\hline
+%    & \textbf{Série 1} & \textbf{Série 2} & \textbf{Série 3} & \textbf{Série 4} & \textbf{Série 5} & \textbf{Série 6} \\
+%\hline
+%\textbf{Tamanho}  & 191672 & 195708   & 142941  & 137257  & 179443  & 177631 \\
+%\hline
+%\end{tabular}
+%\caption{Tamanhos das séries reais}
+%\label{tamanho-series-reais}
+%\end{center}
+%\end{figure}
+
+\subsection{Ambiente}
+
+A implementação de todas as heurísticas foi feita em \verb|C++|, o compilador
+utilizado foi \verb|o g++ 4.4.3|, com flag de otimização \verb|-O2|. O computador
+utilizado para os testes tem \verb|3GB| de RAM e processador Intel(R) Core(TM)2 Duo CPU, T6600  @ 2.20GHz
+de 64 bits.
+
+
+\subsection{Todos os Pares}
+
+Nessa seção reportamos os experimentos realizados sobre 
+o corpus para o problema de \textit{todos os pares}.
+
+Como mencionado, existem duas estruturas principais para esse problema, a f-pair, nossa proposta,
+e outra, usada como baseline, que é somente uma RMQ (chamaremos essa estrutura
+de RMQStructure). Ambas estruturas dependem de uma implementação de RMQ, porém, como observado,
+ existem diferentes algoritmos para o problema de RMQ. Como apresentado na seção \ref{lalal}, na prática, a \verb|RMQ Bucket|
+ apresenta os melhores resultados dentre que têm pré-processamento linear.
+Contudo, a \verb|RMQ St| apresenta o melhor tempo de resposta as pesquisas, apesar do tempo 
+e espaço de pré-processamento de $\theta(n \log n)$.
+
+A heurística f-pair, no nosso ambiente, apresentou consistentemente melhores resultados 
+quando baseada na implementação \verb|RMQ Bucket|. Em outra linha, contudo, a RMQStructure apresenta
+melhores resultados com o \verb|RMQ St|, desde que o espaço de pré-processamento 
+não seja proibitivo (nos testes com séries aleatórias, esse algoritmo
+consumia quase toda memória real do sistema para a série de $5$MB). Sendo assim, criamos duas versões
+do RMQStructure, uma que se basea na \verb|RMQ Bucket| e 
+outra baseada na \verb|RMQ St|, chamamos a primeira versão de \verb|RMQBucket|
+e a segunda de \verb|RMQSt| e reportamos os resultados para ambas versões.
+
+\subsubsection{Séries Aleatórias}
+
+Relembrando, este corpus consiste de 5 séries, com tamanhos variando de $1$MB até $5$MB.
+Cada série é uma permutação gerada aleatoriamente. Na Figura~\ref{pre-random},
+ temos os tempos que cada estrutura levou para ser criada durante o pré-processamento
+e o espaço ocupado por cada estrutura.
+
+\begin{figure}
+\begin{center}
+\begin{tabular}{|l|l|l|l|l|l|l|}
+\hline
+      &    & Série 1 & Série 2 & Série 3 & Série 4 & Série 5 \\
+\hline
+			& \textbf{Tamanho}  & 1048576 & 2097152  & 3145728  & 4194304  & 5242880 \\
+\hline
+			& \textbf{Total f-pairs}  & 1049258 & 2096726   & 3146401  & 4193473  & 5247841 \\
+\hline
+\multirow{2}{*}{\textbf{Fpair}} & Espaço & 109.7 & 228 & 336.8 & 444.5 & 574.9\\
+                                & Tempo & 618.336 & 1279.97 & 1976.78 & 2406.85 & 3372.51\\
+\hline
+\multirow{2}{*}{\textbf{RMQBucket}} & Espaço & 23.2 & 45.1 & 71.8 & 93.5 & 116.8\\
+													          & Tempo & 114.921 & 286.451 & 527.042 & 455.153 & 755.968\\
+\hline
+\multirow{2}{*}{\textbf{RMQSt}} & Espaço & 248.4 & 560.4 & 840 & 1.16GB & 1.46GB \\
+											          & Tempo & 112.431 & 290.094 & 528.019 & 465.001 & 759.326\\
+\hline
+\end{tabular}
+\caption{Tempo (milesegundos) e espaço(megabytes, ao menos se especificado diferente) de pré-processamento para cada estrutura.}
+\label{pre-random}
+\end{center}
+\end{figure}
+
+
+
+Para esse conjunto fizemos dois tipos de experimentos (cada experimento é um conjunto de consultas).
+O primeiro contém consultas com poucas respostas até consultas com número de resposta próximo
+ao tamanho da série, já no segundo,  escolhemos consultas $(t, d)$ que retornem poucos pares, essas
+consultas são o foco principal desse trabalho, uma vez que estamos interessados
+em eventos raros. Nas Figuras~\ref{1-large-random} até ~\ref{5-large-random} estão
+os tempos reportados para o primeiro experimento e nas Figuras~\ref{1-small-random} até~\ref{5-small-random}
+estão as tabelas para o segundo conjunto, de saídas menores. 
+O tempo reportado para uma consulta é calculado através de $5$ (cinco) repetições da mesma
+consulta, isto é, o tempo de cada repetição é medido em milisegundos e a mediana dos tempos
+das repetições é reportada.
+
+Para as saídas grandes, os resultados sugerem que para a \verb|RMQStructure| os tempos são sempre melhores usando a implementação
+com pré-processando $O(n \log n)$ para RMQ (RMQST), porém, devido ao consumo de mémoria não é possível
+usar essa estrutura com a quinta série. Já a estrutura f-pair, para as séries de $1$ a $4$, se mostra melhor
+até um certo tamanho de saída depois começa a ter tempo de resposta pior que a \verb|RMQSt|. Para série $5$,
+ela é melhor em todas as pesquisas. Em outra linha, para as séries com saídas menores, nossa estrutura é bastante rápida.
+Isto é um ponto positivo, pois, sobre o foco eventos raros, essas são as pesquisas mais interessantes.
+
+Os parâmetros $(t, d)$ para gerar saídas pequenas foram formados da seguinte forma. A primeira pesquisa
+foi feita com $t = 4$ e $d = n - 1000$ ($n$ é tamanho da série) e cada pesquisa subsequente foi formada a partir da anterior somando-se
+$200$ ao valor de $t$ e subtraindo $20$ do valor de $d$. Note que para todas as seis séries do conjunto foram usados os mesmos
+$t$'s e $d$'s, de forma que essa sequência de geração foi escolhida por retornar valores pequenos em todas as séries.
+
+Os gráficos apresentados mostram o tamanho da saída no eixo X e os tempos no eixo Y. Para cada estratégia,
+além dos pontos, é apresentada a reta que melhor aproxima o conjunto de pontos, de forma mais formal, a reta
+que minimiza a soma das distâncias euclidianas dos ponto em relação a ela. Note que essa reta parece modelar
+bem o comportamento de cada estratégia. Isto acontece pois como apresentado na parte teórica, o tempo de consulta
+para a estratégia RmqSt é linear, para estratégia rmqBucket é $n\log n$ e, o tempo esperado da f-pair é $n\log n$
+quando a saída é da ordem do tamanho da série. Ou seja, os tempos de consultas são ou uma função linear ou uma próxima. 
+
+\begin{figure}
+\begin{center}
+\includegraphics{/home/cvalentim/Mestrado/research/data_structures/imp/report/outs/22_nov/random_s1/graphics.eps}
+\caption{Série Aleatória 1 - Saídas Grandes}
+\end{center}
+\end{figure}
+
+\begin{figure}
+\begin{center}
+\includegraphics{/home/cvalentim/Mestrado/research/data_structures/imp/report/outs/22_nov/random_s2/graphics.eps}
+\caption{Série Aleatória 2 - Saídas Grandes}
+\end{center}
+\end{figure}
+
+\begin{figure}
+\begin{center}
+\includegraphics{/home/cvalentim/Mestrado/research/data_structures/imp/report/outs/22_nov/random_s3/graphics.eps}
+\caption{Série Aleatória 3 - Saídas Grandes}
+\end{center}
+\end{figure}
+
+\begin{figure}
+\begin{center}
+\includegraphics{/home/cvalentim/Mestrado/research/data_structures/imp/report/outs/22_nov/random_s4/graphics.eps}
+\caption{Série Aleatória 4 - Saídas Grandes}
+\end{center}
+\end{figure}
+
+\begin{figure}
+\begin{center}
+\includegraphics{/home/cvalentim/Mestrado/research/data_structures/imp/report/outs/22_nov/random_s5/graphics.eps}
+\caption{Série Aleatória 5 - Saídas Grandes}
+\end{center}
+\end{figure}
+
+% Table 1 && Table 2 - Random with small output
+\clearpage
+\begin{figure}
+\begin{center}
+\input{/home/cvalentim/Mestrado/research/data_structures/imp/report/outs/12_dec/random_s1/joined-tables.tex}
+\caption{Série Aleatória 1 - Saídas Pequenas}
+\label{1-small-random}
+\end{center}
+\end{figure}
+
+\begin{figure}
+\begin{center}
+\input{/home/cvalentim/Mestrado/research/data_structures/imp/report/outs/12_dec/random_s2/joined-tables.tex}\\
+\caption{Série Aleatória 2 - Saídas Pequenas}
+\label{2-small-random}
+\end{center}
+\end{figure}
+
+
+% Table 3 && Table 4 - Random with small output
+\begin{figure}
+\begin{center}
+\input{/home/cvalentim/Mestrado/research/data_structures/imp/report/outs/12_dec/random_s3/joined-tables.tex}
+\label{3-small-random}
+\caption{Série Aleatória 3 - Saídas Pequenas}
+\end{center}
+\end{figure}
+
+\begin{figure}
+\begin{center}
+\input{/home/cvalentim/Mestrado/research/data_structures/imp/report/outs/12_dec/random_s4/joined-tables.tex} \\
+\label{4-small-random}
+\caption{Série Aleatória 4 - Saídas Pequenas}
+\end{center}
+\end{figure}
+
+
+% Table 6 - Random with small output
+\begin{figure}
+\begin{center}
+\input{/home/cvalentim/Mestrado/research/data_structures/imp/report/outs/12_dec/random_s5/joined-tables.tex}\\
+\caption{Série Aleatória 5 - Saídas Pequenas}
+\label{5-small-random}
+\end{center}
+\end{figure}
+
+
+
+
+\subsubsection{Séries Reais}
+
+Para as séries reais são reportadas consultas com número de respostas pequeno
+em relação ao tamanho da série. Para cada uma das seis séries foram feitas
+9 consultas. Os tempos (em milisegundos) que cada estrutura levou para responder
+cada consulta é reportado nas Figuras~\ref{1-small-random} até~\ref{5-small-random}
+. Note que a estrutura f-pair obtém os menores tempos de resposta,
+e que, em algum casos, os tempos são até 2000 vezes menores.
+
+Na Figura~\ref{pre-real} temos os tempos que cada estrutura levou para pré-processar
+as séries.
+
+\begin{figure}
+\begin{tabular}{|l|l|l|l|l|l|l|l|}
+\hline
+      &    & Série 1 & Série 2 & Série 3 & Série 4 & Série 5 & Série 6\\
+\hline
+			& \textbf{Tamanho}  & 191672 & 195708   & 142941  & 137257  & 179443  & 177631 \\
+\hline
+			& \textbf{Total f-pairs}  & 1386964 & 1305974   & 713019  & 968666  & 853435 & 910915 \\
+\hline
+\multirow{2}{*}{\textbf{Fpair}} & Espaço & 118.6  & 111.3  & 66.4  & 83.2  & 78.6  & 82.1 \\
+                       					& Tempo & 617.135 & 482.167 & 264.001 & 356.84 & 313.852 & 328.672\\
+\hline
+\multirow{2}{*}{\textbf{RMQBucket}} & Espaço & 7.5  & 7.6  & 5.6  & 5.3  & 7.0 & 6.9 \\
+													 					& Tempo & 18.256 & 22.043 & 9.154 & 7.457 & 15.479 & 16.264\\
+\hline
+\multirow{2}{*}{\textbf{RMQSt}} & Espaço &  58.8 & 59.9 & 43.8 & 42.1 & 54.9 & 54.4\\
+											 					& Tempo &  429.415 & 517.824 & 269.665 & 250.911 & 342.497 & 334.736\\
+\hline
+\end{tabular}
+\label{pre-real}
+\caption{Tempo (em milesegundos) e espaço (em megabytes) de pré-processamento para cada estrutura sobre
+o corpus de séries reais.}
+\end{figure}
+
+% Séries reais, tamanho de resposta pequeno.
+% Table 1 - Real serie with small output
+\begin{figure}
+\begin{center}
+\input{/home/cvalentim/Mestrado/research/data_structures/imp/report/outs/12_dec/real_s1/joined-tables.tex}
+\caption{Série Real 1 - Saídas Pequenas}
+\label{1-real}
+\end{center}
+\end{figure}
+
+% Table 2 - Real serie with small output
+\begin{figure}
+\begin{center}
+\input{/home/cvalentim/Mestrado/research/data_structures/imp/report/outs/12_dec/real_s2/joined-tables.tex}\\
+\caption{Série Real 2 - Saídas Pequenas}
+\label{2-real}
+\end{center}
+\end{figure}
+
+% Table 3 - Real serie with small output
+\begin{figure}
+\begin{center}
+\input{/home/cvalentim/Mestrado/research/data_structures/imp/report/outs/12_dec/real_s3/joined-tables.tex}
+\caption{Série Real 3 - Saídas Pequenas}
+\label{3-real}
+\end{center}
+\end{figure}
+
+% Table 4 - Real serie with small output
+\begin{figure}
+\begin{center}
+\input{/home/cvalentim/Mestrado/research/data_structures/imp/report/outs/12_dec/real_s4/joined-tables.tex}\\
+\caption{Série Real 4 - Saídas Pequenas}
+\label{3-real}
+\end{center}
+\end{figure}
+
+
+% Table 5 - Real serie with small output
+\begin{figure}
+\begin{center}
+\input{/home/cvalentim/Mestrado/research/data_structures/imp/report/outs/12_dec/real_s5/joined-tables.tex}
+\caption{Série Real 5 - Saídas Pequenas}
+\end{center}
+\end{figure}
+
+% Table 6 - Real serie with small output
+\begin{figure}
+\begin{center}
+\input{/home/cvalentim/Mestrado/research/data_structures/imp/report/outs/12_dec/real_s6/joined-tables.tex}\\
+\caption{Série Real 6 - Saídas Pequenas}
+\end{center}
+\end{figure}
 \section{Conclusões}
+
+\section{Apêndice A}
+
+\subsection{Séries Aleatórias com saídas grandes}
+\clearpage
+%Table 1 && Table 2 - Random with large output
+\begin{figure}
+\begin{center}
+\input{/home/cvalentim/Mestrado/research/data_structures/imp/report/outs/22_nov/random_s1/joined-tables.tex}
+\caption{Série Aleatória 1 - Saídas Grandes}
+\label{1-large-random}
+\end{center}
+\end{figure}
+
+\begin{figure}
+\begin{center}
+\input{/home/cvalentim/Mestrado/research/data_structures/imp/report/outs/22_nov/random_s2/joined-tables.tex}\\
+\caption{Série Aleatória 2 - Saídas Grandes}
+\label{2-large-random}
+\end{center}
+\end{figure}
+
+
+%Table 3 && Table 4 - Random with large output
+
+\begin{figure}
+\begin{center}
+\input{/home/cvalentim/Mestrado/research/data_structures/imp/report/outs/22_nov/random_s3/joined-tables.tex}
+\caption{Série Aleatória 3 - Saídas Grandes}
+\label{3-large-random}
+\end{center}
+
+\end{figure}
+
+\begin{figure}
+\begin{center}
+\input{/home/cvalentim/Mestrado/research/data_structures/imp/report/outs/22_nov/random_s4/joined-tables.tex} \\
+\caption{Série Aleatória 4 - Saídas Grandes}
+\label{4-large-random}
+\end{center}
+\end{figure}
+
+% Table 5 - Random with large output
+\begin{figure}
+\begin{center}
+\input{/home/cvalentim/Mestrado/research/data_structures/imp/report/outs/22_nov/random_s5/joined-tables.tex}\\
+\caption{Série Aleatória 5 - Saídas Grandes}
+\label{5-large-random}
+\end{center}
+\end{figure}
+
+\clearpage
+
+\begin{figure}
+\begin{center}
+\includegraphics{/home/cvalentim/Mestrado/research/data_structures/imp/report/outs/12_dec/random_s1/graphics.eps}
+\caption{Série Aleatória 1 - Saídas Pequenas}
+\end{center}
+\end{figure}
+
+\begin{figure}
+\begin{center}
+\includegraphics{/home/cvalentim/Mestrado/research/data_structures/imp/report/outs/12_dec/random_s2/graphics.eps}
+\caption{Série Aleatória 2 - Saídas Pequenas}
+\end{center}
+\end{figure}
+
+\begin{figure}
+\begin{center}
+\includegraphics{/home/cvalentim/Mestrado/research/data_structures/imp/report/outs/12_dec/random_s3/graphics.eps}
+\caption{Série Aleatória 3 - Saídas Pequenas}
+\end{center}
+\end{figure}
+
+\begin{figure}
+\begin{center}
+\includegraphics{/home/cvalentim/Mestrado/research/data_structures/imp/report/outs/12_dec/random_s4/graphics.eps}
+\caption{Série Aleatória 4 - Saídas Pequenas}
+\end{center}
+\end{figure}
+
+\begin{figure}
+\begin{center}
+\includegraphics{/home/cvalentim/Mestrado/research/data_structures/imp/report/outs/12_dec/random_s5/graphics.eps}
+\caption{Série Aleatória 5 - Saídas Pequenas}
+\end{center}
+\end{figure}
+
 
 \bibliographystyle{plain}
 
-\bibliography{paper}
-
+%\bibliography{paper}
 
 \end{document}
