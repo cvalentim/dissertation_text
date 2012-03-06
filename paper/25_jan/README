@@ -1,0 +1,13 @@
+beg_result_real_fpair.csv --> Os tempos de consulta para os experimentos. 
+A heurística implementada é FPAIR com a segunda fase usando fila.
+
+beg_result_real_rmqNaive.csv --> Os tempos de consulta para os experimentos
+de séries reais onde a heurística implementada é simples de RMQ. A implementação usada de RMQ
+é a de espaço/tempo de pré-processamento linear porém com consulta O(\log n)
+
+beg_result_real_rmqSt.csv --> O mesmo que anterior, exceto que a estrutura de RMQ é a de pré-processamento
+O (n \log n) porém o tempo de consulta é O(1).
+
+pretimes_fpair.txt -> tempo de pré-processamento heurística fpair
+pretimes_rmqSt.txt -> tempo de pré da heurística RMQ <O(nlogn), O(1)>
+pretimes_rmqNaive.txt -> tempo de pré da heurística RMQ <O(n), O(\logn)>

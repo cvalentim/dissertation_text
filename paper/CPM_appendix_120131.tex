@@ -1,0 +1,468 @@
+ \documentclass[12pt,letterpaper]{article}
+%\usepackage{ltexpprt}     
+
+\usepackage{amsmath, amsthm, amssymb}
+
+\usepackage[dvips]{graphicx}
+%\usepackage{epsf}
+\renewcommand{\baselinestretch}{2}
+   \usepackage{latexsym}
+   \setlength{\oddsidemargin}{-0.2in}
+ \setlength{\textwidth}{6.8in}
+  \setlength{\topmargin}{-0.7in}
+  \setlength{\textheight}{9.4in}
+  \begin{document}
+
+
+\newtheorem{remark}{Remark}
+\newtheorem{lemma}{Lemma}
+\newtheorem{property}{Property}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{corollary}{Corollary}
+\newtheorem{fact}{Fact}
+\newtheorem{definition}{Definition}
+\newtheorem{proposition}{Proposition}
+\newcommand{\DT}{ $D$ }
+
+\title{A data structure for managing financial time series}
+
+\medskip
+
+\normalsize
+
+ \author{Eduardo S. Laber$^1$ \and David Sotelo \and Caio Valentim \\
+ laber@inf.puc-rio.br dsilva@inf.puc-rio.br kakaio9@gmail.com  \\
+1- Departamento de Inform\' atica, PUC-Rio }
+
+
+\date{}
+%\institute{ Departamento de Inform\' atica, PUC-Rio, Brazil.
+% \email{$\{$laber,milidiu,artur$\}$@inf.puc-rio.br}}
+
+\maketitle
+
+\date{}
+
+
+% If we apply the test $t_i$ on the object  $o_j$, we either have
+%$t_i(o_j)=false$ 
+% $o_i$ is applied  
+
+\begin{abstract}
+\end{abstract}
+
+\bigskip
+
+ {\bf Keywords: } Data Structures, Financial Time Series, Range Queries.
+ 
+
+\bigskip
+
+ \section{Problem Definition}
+
+
+
+Given a  sequence
+$A=(a_1,\ldots,a_n)$,
+we consider
+the 
+problem of designing a data structure to efficiently support
+the following queries
+
+
+1.  UP-$(t,d)$  queries. This
+query  returns all
+pairs $(i,j)$ such that: (i) $i<j$;
+(ii) $a_j-a_i \geq d $ and 
+(iii) $j-i \leq t$.  
+The data structure shall also support
+LOW-$(t,d)$ queries, where 
+the condition  $a_j-a_i \geq d$ is
+replaced with $a_j-a_i \leq - d$.
+
+
+2. The cardinality version of the UP-$(t,d)$  queries. This
+query  returns the number of pairs
+ $(i,j)$ such that: (i) $i<j$;
+(ii) $a_j-a_i \geq d $ and 
+(iii) $j-i \leq t$.  The same
+for LOW-$(t,d)$ queries.
+
+
+3. Include absolute value queries
+
+4. UP-$(t,d,first)$ queries. It 
+shall return the set 
+$\{ (a,b) | (a,b)$ is a solution of the UP-$(t,d)$
+query and for each $c<b$, $(a,c)$ is not a solution of the UP-$(t,d)$ query $\}$
+
+
+5. Given a fixed interval, 
+$[ini,last]$ and $d$,
+find all pairs $(i,j)$ such
+that $ini \leq i < j \leq last$ and
+$a_j-a_i \geq d$. This should be a classical problem solved in 
+comp geometry.
+
+6. Approximation queries
+
+
+\section{The Real FS-Data Structure}
+
+% Inicialmentre explicar sobre Range Minimum Queries e Cartesian Trees,
+% dizendo que nossa estrutura cai nesse subproblema.
+% Depois falar sobre a estrutura de dados em si:
+%
+% - falar que mantemos uma lista L com todos os pares satisfazedo $ap_<= ...$
+% e $a_q >= ...$ e que essa lista eh ordenada crescentemente por $q-p$.
+% Temos que dizer que eh possivel construir essa lista ordenada em $O(m + n)$,
+% onde  $m$ eh a quantidade de pares satisfazendo a restricao, e $n$ eh a quantidade
+% de elementos da serie temporal, utilizando counting ou radix sort, uma vez que as diferencas
+% $q-p$ estao entre 1 e $n$.
+%
+%- depois, mantemos um ponteiro para o ultimo elemento da lista
+%
+%
+%
+%
+%
+In this section we introduce a data structure that supports answering UP-$(t,d)$ queries
+over a financial time series $A$ with $O(|A|)$ expected preprocessing time , $O(|A|)$ expected space
+and $O(k + 1)$ worst-case query time, where $k$ is the number of elements returned by the UP-$(t,d)$ query.
+The expected processing time and space values come from the fact that we are going to analyze
+our data structures from an average case perspective.
+
+Three auxiliar data structures are kept for answering  UP-$(t,d)$ queries, being constructed at preprocessing time.
+Ths first one is a list $L$ of interesting pairs of elements of $A$ that will guide our future search procedure for answering queries.
+The second one is a simple hash table $H$ that stores pointers for some elements in $L$.
+The third type of structure are Cartesian Trees, $T_{L}$  and $T_{A}$, used for answering range queries over $L$ and $A$,
+respectively. We proceed now by describing each one of these structures.
+
+%and $n$ is the number of elements in the time series.
+
+%First, we construct structures to 
+%handle both range minimum and maximum queries over $A$
+
+Our first and most important data structure consists of a list $L$ that  stores all pairs $(p,q)$, with $p<q$,  such that
+$ a_p < \min \{a_{p+1},\ldots,a_{q}\}$ and
+$ a_q > \max \{a_{p},\ldots,a_{q-1}\}$.
+%The time gap of a pair $(p,q)$ is $q-p$.
+%========================================================================================================================
+A first point to be observed is that $L$ can be generated in $O(|L| + |A|)$.
+It comes from the following property. Let $L_{p} \subseteq L$ denote the subset of pairs in $L$ with first
+index $p$. Furthermore, let $n$ be the minimum positive value such that $a(p + n) \leq a(p)$.
+Then, $L_{p} = (p, p + 1) \cup L_{p + 1} \cup \ldots \cup (p, p + n) \cup L_{p + n}$.
+Finally, $L = \bigcup \limits_{p=1}^{|A|-1} L_{p}$.
+
+
+
+%========================================================================================================================
+
+%========================================================================================================================
+After constructing $L$, we keep it sorted  by non-decreasing order of time gaps,
+where the {\it time gap} of a pair $(p,q) \in L$ is defined as $q-p$.
+%$L$ can also be sorted in $O(m + n)$, where $m$ is the number of pairs $(p,q)$
+%stored on $L$ and $n$ is the number of elements in the original time series $A$.
+It can be done in $O(|L| + |A|)$ time, by using a linear time sorting algorithm
+(like radix or counting sort), since the time gaps are between $1$ and $|A|-1$.
+%========================================================================================================================
+
+
+%\begin{example}
+%\end{example}
+
+Once $L$ is buildt, we proceed by creating a second auxiliar structure.
+It consists of a hash table $H : \{1,\ldots,|A|-1\} \mapsto L$ that stores, for every $t \in \{1,\ldots,|A|-1\}$, the last position
+of $L$ associated with a pair of time gap at most $t$. This hash table can also be constructed in $O(|L| + |A|)$ time by
+a simple scanning of the entire sorted list $L$.
+
+
+%it will be useful to know the last position of $L$
+%that is associated with a pair of time gap $t$.
+%For that, we construct a vector $V$ that stores for every $t \in \{1,\ldots,n\}$,
+%the last position of $L$ associated with  a pair of time gap at most $t$.
+
+Finally, our third structure is a Cartesian Tree, a data structure used for 
+answering range minimum (maximum) queries. The {\tt Range Minimum (Maximum) Query Problem (RMQ)}
+consists of proprocessing  an array $A[1,n]$ in order to answer the following queries:
+given two indices $i$ and $j$, $1 \leq i \leq j \leq n$, return the index of the
+smallest (biggest) element in the subarray $A[i,j]$.
+Cartesian trees \cite{cartesian80} are well-known for solving the RMQ problem with $O(1)$ query time,
+$O(n)$ preprocessing time and $O(n)$ space complexity.
+
+Two differents Cartesian Trees will be kept, since we will be interested on answering two distinct types of range minimum
+(maximum) queries, one for the original time series $A$ and other for the list of pairs $L$.
+In the first type of RMQ, related to the original time series $A$, we ask for the index of the minimum (maximum) value in the subarray
+$A[i,j]$, where the value of the $k$th element in $A$ is represented by $a_k$.
+In the second type of RMQ, related to the list of pairs $L$,
+we ask for the index of the minimum (maximum) value in the subarray
+$L[i,j]$, where the value of the $k$th element $(p,q)$ is represented by $a_p - a_q$.
+
+
+
+%over two arrays, one representing the original time series $A$ and
+%another storing the pairs  $(p,q) \in L$ 
+
+
+%The {\em deviation} of a pair $(p,q)$ is defined as $a_p-a_q$.
+%To efficiently handle our time series queries  we shall construct a RMQ structure associated with $L$.
+%Given an interval $(i,j)$ in $L$, this structures is able to retrieve the pair with largest deviation 
+%in this interval in $O(1)$ time.
+
+\pagebreak
+
+\section{Appendix}
+
+\begin{proposition}
+Let $S$ be a list of special pairs of a time series given by a random permutation from a set 
+of $n$ distinct elements. Then, the expected size of $S$ is $n - H_n$, where $H_n$ is the $n$-th harmonic number.
+\end{proposition}
+\begin{proof}
+Let $E[X]$ represent the expected size of the list $S$ of special pairs.
+Furthermore, let $X_{i,j}$ denote a random indicator variable
+that stores $1$ if the pair of time indexes $(i,j)$ belongs to $S$ and $0$ otherwise.
+From the previous definitions, $E[X] = E[\sum\limits_{i=1}^{n-1} \sum\limits_{j=i+1}^{n}X_{i,j}]$.
+
+By the linearity of expectation, it follows that:
+
+$E[\sum\limits_{i=1}^{n-1} \sum\limits_{j=i+1}^{n} X_{i,j}] = \sum\limits_{i=1}^{n-1} \sum\limits_{j=i+1}^{n} E[X_{i,j}]$.
+
+Since that $E[X_{i,j}] = \frac{1}{(j-i+1)(j-i)} = \frac{1}{j-i} - \frac{1}{j-i+1}$, we have:
+
+$E[X] = \sum\limits_{i=1}^{n-1} \sum\limits_{j=i+1}^{n}
+(\frac{1}{j-i} - \frac{1}{j-i+1})
+= \sum\limits_{i=1}^{n-1} (1 - \frac{1}{n-i+1})
+= n - \sum\limits_{i=1}^{n} \frac{1}{i}  =  n - H_n$.
+\end{proof}
+
+
+\noindent It will be demonstrated now that, with high probability bounds,
+the size of $S$ concentrates around its mean value. More precisely, we will estimate now the tail distribution of the random variable $X$,
+representing the expected size of a list of special pairs $S$ of a
+a time series given by a random permutation from a set 
+of $n$ distinct elements.
+
+
+
+\begin{proposition}
+%Let $c > 0$ be a real number, then $Pr[X \geq c.n] \leq \frac{\log n}{c^2 n}$
+Let $c > 0$ be a real number, then $Pr\{X \geq c .n \} \leq \frac{c' \log n}{c^2 n}$,
+where $c'$ is a fixed positive constant.
+\end{proposition}
+
+\begin{proof}
+
+\noindent Chebyshev's inequality states that if $X$ is a random variable with expectation $E[X]$ and variance $Var[X]$,
+then $Pr\{ |X - E[X]| \geq c \} \leq \frac{Var[X]}{c^2}$, for any positive constant $c$ given.
+Considering that, by definition,  $Var[X] = E[X^2] - E[X]^2$, and multiplying $c$ by $E[x]$ in the previous inequality, we have
+$Pr\{ |X - E[X]| \geq c E[X] \} \leq \frac{E[X^2] - E[X]^2}{c^2 E[X]^2}$.
+
+In order to make use of Chebyshev's inequality it is necessary to determine $E[X]^2$ and  $E[X^2]$.
+
+From Proposition 1, it follows that $E[X]^2 = (n - H_{n})^2$.
+
+By definition, $E[X^2] = E [( \sum\limits_{i=1}^{n-1} \sum\limits_{j=i+1}^{n} X_{i,j})^2]$.
+Hence, by the linearity of expectation, $E[X^2] = ( 2 \sum\limits_{i=1}^{n-1} \sum\limits_{j=i+1}^{n}
+\sum\limits_{k=i+1}^{n-1} \sum\limits_{l=k+1}^{n} E[X_{i,j} X_{k,l}] ) +
+( \sum\limits_{i=1}^{n-1} \sum\limits_{j=i+1}^{n} E[(X_{i,j})^2] )$.
+
+
+We proceed now by calculating $E[X^2]$. It can be splitted into six disjoint cases.
+
+In each one of the following cases we assume that the product of every pair  
+of random variables $X_{i,j}$ and $X_{k,l}$  is represented by the intersection
+of two closed intervals $[i,j]$ and $[k,l]$, where $[i,j] = \{p | i \leq p \leq j \}$
+and $[k,l] = \{q | k \leq q \leq l \}$.
+
+Furthermore, by means of an abuse of notation, we assume in each one of the following cases that
+the expression $E[X_{i,j} X_{k,l}]$ denotes $\sum\limits_{i}\sum\limits_{j >i}\sum\limits_{k \geq i}\sum\limits_{l > k} E[X_{i,j} X_{k,l}]$, where $[i,j]$ and $[k,l]$ are pairs of intervals belonging to the related case.
+
+
+{\bf Case 1:} Intervals  $[i, j]$ and $[k, l]$ are identical.
+
+$E[X_{i,j} X_{k,l}] = E[X_{i,j} X_{i,j}] = E[X_{i,j}] = \sum\limits_{i=1}^{n-1} \sum\limits_{j=i+1}^{n}
+\frac{1}{(j-i+1)(j-i)} = n - H_n$
+
+\vspace{0.5cm}
+
+
+{\bf Case 2a:} Intervals  $[i, j]$ and $[k, l]$ are disjoint.
+
+$E[X_{i,j} X_{k,l}] = \sum\limits_{i=1}^{n-3} \sum\limits_{j=i+1}^{n-2}
+\sum\limits_{k=j+1}^{n-1} \sum\limits_{l=k+1}^{n} \frac{1}{(j-i+1)(j-i)(l-k+1)(l-k)} = $
+
+$\sum\limits_{i=1}^{n-3} \sum\limits_{j=i+1}^{n-2}  \left[ \frac{1}{(j-i+1)(j-i)}
+\left( \sum\limits_{k=j+1}^{n-1} \sum\limits_{l=k+1}^{n} \frac{1}{(l-k+1)(l-k)} \right) \right] =  $
+
+$\sum\limits_{i=1}^{n-3} \sum\limits_{j=i+1}^{n-2} \frac{(n - j) - H_{(n - j)}} {(j-i+1)(j-i)} 
+= \alpha(n) - \beta(n) - \gamma(n)$, where
+
+$\alpha(n) = \sum\limits_{i=1}^{n-3} \sum\limits_{j=i+1}^{n-2} \frac{n} {(j-i+1)(j-i)}$,
+$\beta(n) = \sum\limits_{i=1}^{n-3} \sum\limits_{j=i+1}^{n-2} \frac{j} {(j-i+1)(j-i)}$ and 
+$\gamma(n) =  \sum\limits_{i=1}^{n-3} \sum\limits_{j=i+1}^{n-2} \frac{H_{(n - j)}} {(j-i+1)(j-i)}$
+%\sum\limits_{i=1}^{n-3} \sum\limits_{j=i+1}^{n-2} \frac{n-j} {(j-i+1)(j-i)}
+
+Let us first calculate $\alpha(n)$:
+
+$\alpha(n) = \sum\limits_{i=1}^{n-3} \sum\limits_{j=i+1}^{n-2} \frac{n} {(j-i+1)(j-i)}
+= n^2 - 2n - H_{(n-2)}$
+
+From $\beta(n)$ definiton, it follows that:
+
+$\beta(n) = \sum\limits_{i=1}^{n-3} \sum\limits_{j=i+1}^{n-2} \frac{j} {(j-i+1)(j-i)}
+= \sum\limits_{i=1}^{n-3} \left( \sum\limits_{j=i+1}^{n-2} \frac{j}{(j-i)} - \frac{j} {(j-i+1)} \right)$
+
+$\beta(n) = \sum\limits_{i=1}^{n-3} \left[ \left( \frac{i+1}{1} +  \frac{i+2}{2} + \ldots + \frac{n-2}{n-i-2} \right)
+- \left( \frac{i+1}{2} +  \frac{i+2}{3} + \ldots + \frac{n-2}{n-i-1} \right) \right]$
+
+$\beta(n) = \sum\limits_{i=1}^{n-3} \left[
+\frac{i+1}{1}  + \left( \frac{1}{2} +  \frac{1}{3} + \ldots + \frac{1}{n-i-2} \right)
+- \frac{n-2}{n-i-1} \right]
+= \sum\limits_{i=1}^{n-3} \left( i + H_{(n-2)} - \frac{n-i-2}{n-i-1} \right)$
+
+$\beta(n) = \frac{(n-3)(n-2)}{2} + \sum\limits_{i=1}^{n-3} H_{i} - \sum\limits_{i=2}^{n-2} \frac{n-2}{i}$
+
+$\beta(n) = \frac{n^2}{2} - \Theta(n \log n)$.
+
+Similarly, a tight bound can be determined for $\gamma(n)$:
+
+$\gamma(n) =  \sum\limits_{i=1}^{n-3} \sum\limits_{j=i+1}^{n-2} \frac{H_{(n - j)}} {(j-i+1)(j-i)}
+\leq  \sum\limits_{i=1}^{n-3} \sum\limits_{j=i+1}^{n-2} \frac{H_{n}} {(j-i+1)(j-i)}
+\leq  n . H(n) = O(n \log n) $
+
+$\gamma(n) =  \sum\limits_{i=1}^{n-3} \sum\limits_{j=i+1}^{n-2} \frac{H_{(n - j)}} {(j-i+1)(j-i)}
+\geq  \sum\limits_{i=1}^{\frac{n-2}{2} - 1} \sum\limits_{j=i+1}^{\frac{n-2}{2}} \frac{H_{(n/2)}} {(j-i+1)(j-i)}
+\geq  H(n/2) . \left[\frac{n-2}{2} - H_{(n-2)/2} \right] = \Omega(n \log n) $
+
+Therefore, $\gamma(n) = \Theta(n \log n)$.
+
+
+Returning to the original equation:
+
+$\sum\limits_{i=1}^{n-3} \sum\limits_{j=i+1}^{n-2} \frac{(n - j) - H_{(n - j)}} {(j-i+1)(j-i)} 
+= \alpha(n) - \beta(n) - \gamma(n)
+\leq  \frac{n^2}{2} + \Theta(n \log n)$
+
+\vspace{0.5cm}
+
+{\bf Case 2b:} Interval $[k, l]$ is a subinterval of $[i, j]$.
+
+$E[X_{i,j} X_{k,l}] = \sum\limits_{i=1}^{n-3} \sum\limits_{k=i+1}^{n-2}
+\sum\limits_{l=k+1}^{n-1} \sum\limits_{j=l+1}^{n} \frac{1}{(j-i+1)(j-i)(l-k+1)(l-k)}
+\leq  \sum\limits_{i=1}^{n-3} \sum\limits_{k=i+1}^{n-2}
+\sum\limits_{l=k+1}^{n-1} \sum\limits_{j=l+1}^{n} \frac{1}{(l-k+1)(l-k)(l-k+1)(l-k)}$
+
+$E[X_{i,j} X_{k,l}] \leq\sum\limits_{i=1}^{n-3} \sum\limits_{k=i+1}^{n-2}
+\sum\limits_{l=k+1}^{n-1} \sum\limits_{j=l+1}^{n} \frac{1}{(l-k)^4}
+\leq n \sum\limits_{i=1}^{n-3} \sum\limits_{k=i+1}^{n-2}
+\sum\limits_{l=k+1}^{n-1}  \frac{1}{(l-k)^4} $
+
+$E[X_{i,j} X_{k,l}] \leq n \sum\limits_{i=1}^{n-3} \sum\limits_{k=i+1}^{n-2}
+\left( \displaystyle \int\limits_{k}^{n-2} \! \frac{1}{(l-k)^4} \, \mathrm{d}l \right)
+\leq 3n \sum\limits_{i=1}^{n-3} \sum\limits_{k=i+1}^{n-2} \frac{1}{k^3} $
+
+$E[X_{i,j} X_{k,l}]  \leq 3n \sum\limits_{i=1}^{n-3}
+\left( \displaystyle \int\limits_{i}^{n-3} \! \frac{1}{k^3} \, \mathrm{d}k \right)
+\leq 6n \sum\limits_{i=1}^{n-3} \frac{1}{i^2}
+ \leq 6n \left( 1 + \displaystyle \int\limits_{1}^{n-4} \! \frac{1}{i^2} \, \mathrm{d}i \right)
+ \leq 18n$
+
+\vspace{0.5cm}
+
+{\bf Case 3:} Intersection between intervals $[i, j]$ and $[k, l]$ with no shared extremes.
+
+$E[X_{i,j} X_{k,l}] = \sum\limits_{i=1}^{n-3} \sum\limits_{k=i+1}^{n-2}
+\sum\limits_{j=k+1}^{n-1} \sum\limits_{l=j+1}^{n} \frac{1}{(l-i+1)(l-i)(j-i)(l-k-1)}$
+
+This sum can be writen as:
+
+$E[X_{i,j} X_{k,l}] = \sum\limits_{i=1}^{n-3} \sum\limits_{j=i+2}^{n-1}
+\sum\limits_{k=i+1}^{j-1} \sum\limits_{l=j+1}^{n} \frac{1}{(l-i+1)(l-i)(j-i)(l-k-1)}$
+
+
+Since that $j < l$ and $ l - k < j - i$, we have:
+
+$E[X_{i,j} X_{k,l}] < \sum\limits_{i=1}^{n-3} \sum\limits_{j=i+2}^{n-1}
+\sum\limits_{k=i+1}^{j-1} \sum\limits_{l=j+1}^{n} \frac{1}{(j-i+1)(j-i)(l-k)(l-k-1)}$
+
+$E[X_{i,j} X_{k,l}] < \sum\limits_{i=1}^{n-3} \sum\limits_{j=i+2}^{n-1}
+\left[ \frac{1}{(j-i+1)(j-i)}  \left( \sum\limits_{k=i+1}^{j-1} \sum\limits_{l=j+1}^{n} \frac{1}{(l-k)(l-k-1)} \right) \right]$
+
+$E[X_{i,j} X_{k,l}] < \sum\limits_{i=1}^{n-3} \sum\limits_{j=i+2}^{n-1}
+\left[ \frac{1}{(j-i+1)(j-i)}  \sum\limits_{k=i+1}^{j-1} \sum\limits_{l=j+1}^{n}  \left(  \frac{1}{l-k-1} - \frac{1}{l-k}  \right) \right]$
+
+$E[X_{i,j} X_{k,l}] < \sum\limits_{i=1}^{n-3} \sum\limits_{j=i+2}^{n-1}
+\left[ \frac{1}{(j-i+1)(j-i)}  \sum\limits_{k=i+1}^{j-1}  \left(  \frac{1}{j-k} - \frac{1}{n-k}  \right) \right]$
+
+$E[X_{i,j} X_{k,l}] < \sum\limits_{i=1}^{n-3} \sum\limits_{j=i+2}^{n-1}
+\frac{H_{n}}{(j-i+1)(j-i)} $
+
+Therefore, $E[X_{i,j} X_{k,l}] = O(n \log n)$.
+
+\vspace{0.5cm}
+
+{\bf Case 4:} Intersection between intervals $[i, j]$ and $[k, l]$ with $i = k$.
+
+$E[X_{i,j} X_{k,l}] = \sum\limits_{i=1}^{n-2}
+\sum\limits_{j=i+1}^{n-1} \sum\limits_{l=j+1}^{n} \frac{1}{(l-i+1)(l-i)(j-i)}$
+
+$E[X_{i,j} X_{k,l}] = \sum\limits_{i=1}^{n-2}
+\sum\limits_{j=i+1}^{n-1} \left[ \frac{1}{(j-i)} \sum\limits_{l=j+1}^{n} \frac{1}{(l-i+1)(l-i)} \right]
+\leq \sum\limits_{i=1}^{n-2}
+\sum\limits_{j=i+1}^{n-1} \frac{1}{(j-i)(j-i+1)}$
+
+Hence, $E[X_{i,j} X_{k,l}] \leq n - H_{n}$.
+
+\vspace{0.5cm}
+
+{\bf Case 5:} Intersection between intervals $[i, j]$ and $[k, l]$ with $j = k$.
+
+$E[X_{i,j} X_{k,l}] = \sum\limits_{i=1}^{n-2}
+\sum\limits_{j=i+1}^{n-1} \sum\limits_{l=j+1}^{n} \frac{1}{(l-i+1)(l-i)(l-i-1)}
+\leq \sum\limits_{i=1}^{n-2}
+\sum\limits_{j=i+1}^{n-1} \sum\limits_{l=j+1}^{n} \frac{1}{(l-i+1)(l-i)}
+$
+
+$E[X_{i,j} X_{k,l}] \leq \sum\limits_{i=1}^{n-2}
+\sum\limits_{j=i+1}^{n-1} \sum\limits_{l=j+1}^{n} \left( \frac{1}{l-i} - \frac{1}{l-i+1} \right)
+\leq \sum\limits_{i=1}^{n-2}
+\sum\limits_{j=i+1}^{n-1} \frac{1}{j-i+1}
+$
+
+$E[X_{i,j} X_{k,l}] \leq \sum\limits_{i=1}^{n-2} H_{n}$. Therefore, $E[X_{i,j} X_{k,l}] = O(n \log n)$.
+
+
+{\bf Case 6:} Intersection between intervals $[i, j]$ and $[k, l]$ with $j = l$.
+
+This is identical to case 4. Hence, $E[X_{i,j} X_{k,l}] \leq n - H_{n}$.
+
+
+\vspace{0.5cm}
+
+
+Once that all six cases were analised we are able to estimate $E[X^2]$.
+First, it is important to observe that, with exception the case 2a, all other cases
+are upper bounded by $O(n \log n)$. In the case 2a, in particular,
+$E[X_{i,j} X_{k,l}] = \frac{n^2}{2} + \Theta(n \log n)$. Furthermore, by the definition of $E[X^2]$,
+with exception the case 1, the results of all other cases must be multiplied by 2.
+Therefore, $E[X^2] = n^2+ \Theta(n \log n)$.
+
+Recall that, from Chebyshev's inequality, $Pr\{ |X - E[X]| \geq c E[X] \} \leq \frac{E[X^2] - E[X]^2}{c^2 E[X]^2}$.
+
+Consequently, $Pr\{ X \geq c n \} \leq Pr\{ X \geq c (n - H_{n}) \} = \frac{n^2 + \Theta(n \log n) - (n - H_{n})^2}{c^2 (n - H_{n})^2}$.
+
+Therefore, $Pr\{ X \geq c n \} \leq \frac{c' \log n}{c^2 n}$ where $c'$ is a positive constant.
+
+
+
+
+\end{proof}
+
+ 
+\end{document}
+
+
+
+
+

@@ -1,0 +1,66 @@
+Heuristic, RMQ,  Serie, t,    d,    ans,  av_time, min,  med,  max   
+RMQHeuristic, RMQNaive, 191672, 2     , 1.6   , 96    , 0.0   , 0.03  , 0.03  , 0.09  
+RMQHeuristic, RMQNaive, 191672, 3     , 1.9   , 107   , 0.0   , 0.03  , 0.03  , 0.05  
+RMQHeuristic, RMQNaive, 191672, 4     , 2.2   , 91    , 0.0   , 0.02  , 0.03  , 0.04  
+RMQHeuristic, RMQNaive, 191672, 5     , 2.7   , 67    , 0.0   , 0.01  , 0.01  , 0.03  
+RMQHeuristic, RMQNaive, 191672, 6     , 3.2   , 55    , 0.0   , 0.01  , 0.01  , 0.02  
+RMQHeuristic, RMQNaive, 191672, 7     , 3.9   , 32    , 0.0   , 0.01  , 0.01  , 0.02  
+RMQHeuristic, RMQNaive, 191672, 8     , 4.7   , 21    , 0.0   , 0.01  , 0.01  , 0.01  
+RMQHeuristic, RMQNaive, 191672, 9     , 5.6   , 19    , 0.0   , 0.01  , 0.01  , 0.01  
+RMQHeuristic, RMQNaive, 191672, 10    , 6.7   , 6     , 0.0   , 0.01  , 0.01  , 0.01  
+RMQHeuristic, RMQNaive, 191672, 11    , 8.0   , 0     , 0.0   , 0.00  , 0.00  , 0.01  
+
+RMQHeuristic, RMQNaive, 195708, 2     , 1.6   , 95    , 0.0   , 0.03  , 0.03  , 0.07  
+RMQHeuristic, RMQNaive, 195708, 3     , 1.9   , 96    , 0.0   , 0.02  , 0.03  , 0.05  
+RMQHeuristic, RMQNaive, 195708, 4     , 2.2   , 84    , 0.0   , 0.02  , 0.02  , 0.05  
+RMQHeuristic, RMQNaive, 195708, 5     , 2.7   , 72    , 0.0   , 0.02  , 0.02  , 0.03  
+RMQHeuristic, RMQNaive, 195708, 6     , 3.2   , 60    , 0.0   , 0.01  , 0.01  , 0.02  
+RMQHeuristic, RMQNaive, 195708, 7     , 3.9   , 44    , 0.0   , 0.01  , 0.01  , 0.02  
+RMQHeuristic, RMQNaive, 195708, 8     , 4.7   , 25    , 0.0   , 0.01  , 0.01  , 0.01  
+RMQHeuristic, RMQNaive, 195708, 9     , 5.6   , 16    , 0.0   , 0.01  , 0.01  , 0.01  
+RMQHeuristic, RMQNaive, 195708, 10    , 6.7   , 4     , 0.0   , 0.00  , 0.00  , 0.01  
+RMQHeuristic, RMQNaive, 195708, 11    , 8.0   , 0     , 0.0   , 0.00  , 0.00  , 0.01  
+
+RMQHeuristic, RMQNaive, 142941, 2     , 1.6   , 2568  , 1.1   , 0.96  , 1.05  , 1.21  
+RMQHeuristic, RMQNaive, 142941, 3     , 1.9   , 2619  , 1.2   , 0.69  , 1.21  , 1.56  
+RMQHeuristic, RMQNaive, 142941, 4     , 2.2   , 2306  , 0.6   , 0.51  , 0.55  , 0.65  
+RMQHeuristic, RMQNaive, 142941, 5     , 2.7   , 1875  , 0.4   , 0.40  , 0.41  , 0.57  
+RMQHeuristic, RMQNaive, 142941, 6     , 3.2   , 1448  , 0.3   , 0.29  , 0.32  , 0.40  
+RMQHeuristic, RMQNaive, 142941, 7     , 3.9   , 1056  , 0.2   , 0.21  , 0.21  , 0.23  
+RMQHeuristic, RMQNaive, 142941, 8     , 4.7   , 723   , 0.1   , 0.12  , 0.12  , 0.16  
+RMQHeuristic, RMQNaive, 142941, 9     , 5.6   , 463   , 0.1   , 0.07  , 0.07  , 0.09  
+RMQHeuristic, RMQNaive, 142941, 10    , 6.7   , 258   , 0.0   , 0.04  , 0.04  , 0.05  
+RMQHeuristic, RMQNaive, 142941, 11    , 8.0   , 118   , 0.0   , 0.02  , 0.02  , 0.03  
+
+RMQHeuristic, RMQNaive, 137257, 2     , 1.6   , 286   , 0.1   , 0.10  , 0.10  , 0.17  
+RMQHeuristic, RMQNaive, 137257, 3     , 1.9   , 348   , 0.1   , 0.11  , 0.12  , 0.14  
+RMQHeuristic, RMQNaive, 137257, 4     , 2.2   , 377   , 0.1   , 0.12  , 0.12  , 0.15  
+RMQHeuristic, RMQNaive, 137257, 5     , 2.7   , 340   , 0.1   , 0.10  , 0.10  , 0.12  
+RMQHeuristic, RMQNaive, 137257, 6     , 3.2   , 265   , 0.1   , 0.08  , 0.08  , 0.09  
+RMQHeuristic, RMQNaive, 137257, 7     , 3.9   , 190   , 0.0   , 0.05  , 0.05  , 0.06  
+RMQHeuristic, RMQNaive, 137257, 8     , 4.7   , 134   , 0.0   , 0.03  , 0.03  , 0.04  
+RMQHeuristic, RMQNaive, 137257, 9     , 5.6   , 92    , 0.0   , 0.02  , 0.02  , 0.03  
+RMQHeuristic, RMQNaive, 137257, 10    , 6.7   , 48    , 0.0   , 0.01  , 0.01  , 0.02  
+RMQHeuristic, RMQNaive, 137257, 11    , 8.0   , 45    , 0.0   , 0.01  , 0.01  , 0.01  
+
+RMQHeuristic, RMQNaive, 179443, 2     , 1.6   , 346   , 0.1   , 0.12  , 0.12  , 0.19  
+RMQHeuristic, RMQNaive, 179443, 3     , 1.9   , 393   , 0.1   , 0.13  , 0.13  , 0.17  
+RMQHeuristic, RMQNaive, 179443, 4     , 2.2   , 362   , 0.1   , 0.12  , 0.12  , 0.14  
+RMQHeuristic, RMQNaive, 179443, 5     , 2.7   , 330   , 0.1   , 0.10  , 0.10  , 0.12  
+RMQHeuristic, RMQNaive, 179443, 6     , 3.2   , 262   , 0.1   , 0.07  , 0.07  , 0.08  
+RMQHeuristic, RMQNaive, 179443, 7     , 3.9   , 164   , 0.0   , 0.04  , 0.04  , 0.05  
+RMQHeuristic, RMQNaive, 179443, 8     , 4.7   , 116   , 0.0   , 0.02  , 0.02  , 0.04  
+RMQHeuristic, RMQNaive, 179443, 9     , 5.6   , 77    , 0.0   , 0.01  , 0.02  , 0.03  
+RMQHeuristic, RMQNaive, 179443, 10    , 6.7   , 47    , 0.0   , 0.01  , 0.01  , 0.02  
+RMQHeuristic, RMQNaive, 179443, 11    , 8.0   , 26    , 0.0   , 0.01  , 0.01  , 0.01  
+
+RMQHeuristic, RMQNaive, 177631, 2     , 1.6   , 372   , 0.1   , 0.13  , 0.13  , 0.19  
+RMQHeuristic, RMQNaive, 177631, 3     , 1.9   , 392   , 0.2   , 0.15  , 0.15  , 0.19  
+RMQHeuristic, RMQNaive, 177631, 4     , 2.2   , 353   , 0.1   , 0.12  , 0.12  , 0.15  
+RMQHeuristic, RMQNaive, 177631, 5     , 2.7   , 283   , 0.1   , 0.10  , 0.10  , 0.11  
+RMQHeuristic, RMQNaive, 177631, 6     , 3.2   , 203   , 0.1   , 0.06  , 0.06  , 0.08  
+RMQHeuristic, RMQNaive, 177631, 7     , 3.9   , 140   , 0.0   , 0.04  , 0.04  , 0.05  
+RMQHeuristic, RMQNaive, 177631, 8     , 4.7   , 111   , 0.0   , 0.03  , 0.03  , 0.04  
+RMQHeuristic, RMQNaive, 177631, 9     , 5.6   , 81    , 0.0   , 0.02  , 0.02  , 0.03  
+RMQHeuristic, RMQNaive, 177631, 10    , 6.7   , 51    , 0.0   , 0.01  , 0.01  , 0.04  
+RMQHeuristic, RMQNaive, 177631, 11    , 8.0   , 26    , 0.0   , 0.01  , 0.01  , 0.02  

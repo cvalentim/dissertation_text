@@ -276,7 +276,7 @@ em relação à série é o conjunto $\{(1, 2); (3, 4); (3, 5); (4, 5) \}$.
 
 \begin{lem}
 O valor esperado da quantidade de f-pairs em uma
-permutação aleatória $<a_1, a_2, \ldots, a_n>$ é $n - H_n$, onde
+permutação aleatória dos números $\{1, 2, \ldots, n\}$ é $n - H_n$, onde
 $H_n$ é a soma dos $n$ primeiros termos da série harmônica.
 \label{amountf}
 \end{lem}
@@ -284,22 +284,22 @@ $H_n$ é a soma dos $n$ primeiros termos da série harmônica.
 \begin{proof}
 Seja a $F_{(i, j)}$ uma variável aleatória indicadora que assume valor
 $1$ se $(i, j)$ é um f-pair e $0$, caso contrário. Nós estamos interessados
-em encontrar $E[\sum_{i = 1}^n \sum_{j=i + 1}^n F_{(i, j)}]$, que, pela linearidade
-do valor esperado é igual a $\sum_{i = 1}^n \sum_{j = i + 1}^n E[F_{(i, j)}]$.  
+em encontrar $E[\sum_{i = 1}^{n-1} \sum_{j=i + 1}^n F_{(i, j)}]$, que, pela linearidade
+do valor esperado é igual a $\sum_{i = 1}^{n-1} \sum_{j = i + 1}^n E[F_{(i, j)}]$.  
 
 Como $F_{(i, j)}$ é uma variável indicadora seu valor esperado é $Pr[F_{(i,j)} == 1]$.
 Para calcular esse valor devemos observar que para $(i, j)$ ser um f-pair, por definição,
 $a_i$ deve ser o menor elemento do intervalo $[i, j]$ e $a_j$ o maior. Como estamos
 tratando de permutações aleatórias, $a_i$ tem probabilidade de $\frac{1}{j - i + 1}$ de
 ser o menor, e, uma vez que $a_i$ é o menor, $a_j$ tem probabilidade de $\frac{1}{j - i}$ de
-ser o maior. Logo, $Pr[F_{(i, j)} == 1] = \frac{1}{(j - i + 1) (j - i)}$. Com isso podemos
+ser o maior. Logo, $Pr[F_{(i, j)} = 1] = \frac{1}{(j - i + 1) (j - i)}$. Com isso podemos
 estimar o somatório original:
 
-$$\sum_{i = 1}^n \sum_{j = i + 1}^n  \frac{1}{(j - i + 1) (j - i)}$$
+$$\sum_{i = 1}^{n-1} \sum_{j = i + 1}^n  \frac{1}{(j - i + 1) (j - i)}$$
 
 Extendendo a série telescópica, tem-se:
 
-$$\sum_{i = 1}^n \sum_{j = i + 1}^n  \frac{1}{(j - i + 1) (j - i)} = \sum_{i = 1}^n \sum_{j = i + 1}^n  \frac{1}{(j - i)} - \frac{1}{(j - i + 1)} = \sum_{i = 1}^n 1 - \frac{1}{n - i + 1} = n - H_n $$
+$$\sum_{i = 1}^{n-1} \sum_{j = i + 1}^n  \frac{1}{(j - i + 1) (j - i)} = \sum_{i = 1}^{n-1} \sum_{j = i + 1}^n  \frac{1}{(j - i)} - \frac{1}{(j - i + 1)} = \sum_{i = 1}^n 1 - \frac{1}{n - i + 1} = n - H_n $$
 
 Com isso completamos a demonstração que o valor esperado do número de f-pairs é $n - H_n$.
 \end{proof}
@@ -315,13 +315,17 @@ Under construction.
 Note que o lema trata de permutações aleatórias, porém, qualquer série
 pode ser mapeada em uma permutação com exatamente o mesmo número de f-pairs,
 uma vez a definição de f-pair só utiliza o tamanho relativo dos elementos.
+De forma concreta, seja uma série de entrada $<2.1, 1.14, 10.0, 0.1>$, 
+esta série pode mapeada na permutação $<3, 2, 4, 1>$ com exatamente o mesmo número de
+f-pairs.
+
 Desta forma, o Lema~\ref{amountf} mostra que o número esperado de f-pairs não é grande
 para qualquer possível série de entrada. Como será apresentado posteriormente os f-pairs podem ser usados para responder
 consultas $(t, d)$, sendo assim, eles precisam ser gerados e armazenados
 durante o pré-processamento. Desta forma, apresentamos o algoritmo na Figura~\ref{gemfpair} para geração
 dos f-pairs. A idéia básica do pseudo-código é que para encontrar todos os f-pairs da
 série $<a_1, a_2, \ldots, a_n>$ podemos fixar o menor elemento $a_m$ da série,
-gerar todos os f-pairs envolvendo $a_m$, e depois continuar recursivamente para as metades $[1, m - 1]$ e $[m + 1, n]$.
+gerar todos os f-pairs envolvendo $a_m$, e depois continuar recursivamente para as partições $[1, m - 1]$ e $[m + 1, n]$.
 
 \clearpage
 \begin{figure}
@@ -367,23 +371,28 @@ O resultado abaixo mostra a relação dos f-pairs com as respostas de consultas.
 
 \begin{lem}
 \label{fundamental}
-Para toda solução $(i, j)$ de uma pesquisa $(t, d)$ um dos três 
-casos abaixo é válido:
+Seja $(i, j)$ uma saída para uma consulta $(t, d)$. Então, temos o seguinte:
 \begin{enumerate}
-\item $(i, j)$ é um f-pair.
-\item $i$ é o início de um f-pair.
-\item $j$ é o fim de um f-pair.
+
+\item Existe um índice $i*$ tal que $(i*, j)$ é uma solução e $i*$ é o começo
+de um f-pair que é também uma solução.
+
+\item Existe um índice $j*$ tal que $(i, j*)$ é uma solução e $j*$ é o final 
+de um f-pair que também é uma solução.
+
 \end{enumerate}
 \end{lem}
 
 \begin{proof}
-Tome uma solução $(i, j)$, se ela for um f-pair, o resultado vale imediatamente.
-Caso contrário, existe um índice $k \in [i, j]$ tal que $a_k < a_i$ ou $a_k > a_j$.
-Suponha que $a_k < a_i$, o outro caso é análogo. Como $a_k < a_i$ o par $(k, j)$ também
-é uma solução, então basta mostrar que $k$ é o começo de um f-pair. Para isso, podemos
-supor sem perda de generalidade que $k$ é tal que $a_k$ é o menor elemento no intervalo
-$[i, j]$ e notar que o $(k, k')$ é um f-pair, onde $k'$ é o índice do maior elemento entre $k + 1$ e $j$.
+Vamos apenas provar a primeira condição, a segunda é análoga. Seja $i*$ o índice
+de menor entre os índices do conjunto ${i, \ldots, j-1}$. Em caso de empate,
+nós consideramos o maior índice. Como $a_{i*} < a_i$ e $(i, j)$ é um evento, nós
+temos que $(i*, j)$ também é um evento. Seja $k*$ o índice de maior valor em A
+entre aqueles do intervalo ${i* + 1, \ldots, j}$. O par $(i*, k*)$ é um evento
+e um f-pair. O que completa a demonstração.
 \end{proof}
+
+
 
 Com o Lema~\ref{fundamental}, podemos usar a seguinte estratégia 
 para encontrar todas as soluções para uma pesquisa $(t,d)$:
@@ -410,7 +419,7 @@ f-pairs que têm como início um elemento do conjunto $I_f$ já foram gerados, s
 para saber se uma solução já foi gerada, basta verificar se o início dela faz parte do conjunto $I_f$, ou seja,
 o hash é apenas um vetor com os inicíos em $I_f$ marcados.
 
-Note que da forma descrita, uma vez que temos $I_f$ e $E_f$, o número de passos para encontrar todas as soluções é $O(k)$.
+Note que da forma descrita, uma vez que temos $I_f$ e $E_f$, o número de passos para encontrar todas as soluções é $O(k)$, onde $k$ é o número de respostas a consulta.
 Além disso, note que uma solução é processada no máximo duas vezes (uma a partir do conjunto $I_f$ e outra pelo conjunto $E_f$).
 Na Figura~\ref{fpairqueryphase2} há um pseudo-código dessa etapa.
 
@@ -747,7 +756,8 @@ e a segunda de \verb|RMQSt| e reportamos os resultados para ambas versões.
 Relembrando, este corpus consiste de 5 séries, com tamanhos variando de $1$MB até $5$MB.
 Cada série é uma permutação gerada aleatoriamente. Na Figura~\ref{pre-random},
  temos os tempos que cada estrutura levou para ser criada durante o pré-processamento
-e o espaço ocupado por cada estrutura.
+e o espaço ocupado por cada estrutura. Note que a quantidade de f-pair e o espaço
+ocupado pela série são aderentes a análise teórica.
 
 \begin{figure}
 \begin{center}
@@ -787,6 +797,12 @@ O tempo reportado para uma consulta é calculado através de $5$ (cinco) repeti�
 consulta, isto é, o tempo de cada repetição é medido em milisegundos e a mediana dos tempos
 das repetições é reportada.
 
+Os parâmetros $(t, d)$ para gerar saídas pequenas foram formados da seguinte forma. A primeira pesquisa
+foi feita com $t = 4$ e $d = n - 1000$ ($n$ é tamanho da série) e cada pesquisa subsequente foi formada a partir da anterior somando-se
+$200$ ao valor de $t$ e subtraindo $20$ do valor de $d$. Note que para todas as seis séries do conjunto foram usados os mesmos
+$t$'s e $d$'s, de forma que essa sequência de geração foi escolhida por retornar valores pequenos em todas as séries.
+
+
 Para as saídas grandes, os resultados sugerem que para a \verb|RMQStructure| os tempos são sempre melhores usando a implementação
 com pré-processando $O(n \log n)$ para RMQ (RMQST), porém, devido ao consumo de mémoria não é possível
 usar essa estrutura com a quinta série. Já a estrutura f-pair, para as séries de $1$ a $4$, se mostra melhor
@@ -794,13 +810,9 @@ até um certo tamanho de saída depois começa a ter tempo de resposta pior que 
 ela é melhor em todas as pesquisas. Em outra linha, para as séries com saídas menores, nossa estrutura é bastante rápida.
 Isto é um ponto positivo, pois, sobre o foco eventos raros, essas são as pesquisas mais interessantes.
 
-Os parâmetros $(t, d)$ para gerar saídas pequenas foram formados da seguinte forma. A primeira pesquisa
-foi feita com $t = 4$ e $d = n - 1000$ ($n$ é tamanho da série) e cada pesquisa subsequente foi formada a partir da anterior somando-se
-$200$ ao valor de $t$ e subtraindo $20$ do valor de $d$. Note que para todas as seis séries do conjunto foram usados os mesmos
-$t$'s e $d$'s, de forma que essa sequência de geração foi escolhida por retornar valores pequenos em todas as séries.
 
 Os gráficos apresentados mostram o tamanho da saída no eixo X e os tempos no eixo Y. Para cada estratégia,
-além dos pontos, é apresentada a reta que melhor aproxima o conjunto de pontos, de forma mais formal, a reta
+além dos pontos, é apresentada a reta que melhor aproxima o conjunto de pontos, formalmente, a reta
 que minimiza a soma das distâncias euclidianas dos ponto em relação a ela. Note que essa reta parece modelar
 bem o comportamento de cada estratégia. Isto acontece pois como apresentado na parte teórica, o tempo de consulta
 para a estratégia RmqSt é linear, para estratégia rmqBucket é $n\log n$ e, o tempo esperado da f-pair é $n\log n$
@@ -899,8 +911,10 @@ cada consulta é reportado nas Figuras~\ref{1-small-random} até~\ref{5-small-ra
 . Note que a estrutura f-pair obtém os menores tempos de resposta,
 e que, em algum casos, os tempos são até 2000 vezes menores.
 
-Na Figura~\ref{pre-real} temos os tempos que cada estrutura levou para pré-processar
-as séries.
+Na Figura~\ref{pre-real} temos o tempo e espaço que cada estrutura levou para pré-processar
+as séries. Note que como esses dados são números em ponto-flutuante, cada elemento
+da série é representado com $8$ bytes, e não com $4$, como nas séries aleatórias compostas
+de números inteiros.
 
 \begin{figure}
 \begin{tabular}{|l|l|l|l|l|l|l|l|}

@@ -1,0 +1,421 @@
+\documentclass[12pt,letterpaper]{article}
+
+\usepackage{multirow}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{epstopdf}
+\usepackage{multirow}
+\usepackage{graphicx}
+
+\usepackage{color}
+\usepackage{ulem}
+
+
+\begin{document}
+
+
+%\usepackage{amsmath, amsthm, amssymb}
+%\usepackage[dvips]{graphicx}
+%\usepackage{epsf}
+
+\renewcommand{\baselinestretch}{1.5}
+%   \usepackage{latexsym}
+
+
+\newtheorem{remark}{Remark}
+\newtheorem{lemma}{Lemma}
+\newtheorem{property}{Property}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{corollary}{Corollary}
+\newtheorem{fact}{Fact}
+\newtheorem{definition}{Definition}
+\newtheorem{proposition}{Proposition}
+\newcommand{\DT}{ $D$ }
+\newcommand{\azul}[1]{\textcolor{blue}{#1}}
+
+\title{Experiments}
+
+\medskip
+
+\normalsize
+
+\date{}
+%\institute{ Departamento de Inform\' atica, PUC-Rio, Brazil.
+% \email{$\{$laber,milidiu,artur$\}$@inf.puc-rio.br}}
+
+\maketitle
+
+\date{}
+
+
+% If we apply the test $t_i$ on the object  $o_j$, we either have
+%$t_i(o_j)=false$ 
+% $o_i$ is applied  
+
+\begin{abstract}
+\end{abstract}
+
+\bigskip
+
+ {\bf Keywords: } Data Structures
+ 
+
+\bigskip
+
+
+All the codes were developed in  \verb|C++|, using compiler \verb|o g++ 4.4.3|, with the optimization flag \verb|-O2| activated. 
+Our codes were executed in
+a  64 bits Intel(R) Core(TM)2 Duo CPU, T6600 @ 2.20GHz, 
+with  \verb|3GB| of RAM. 
+
+\subsection{All Pairs}
+\clearpage
+For each of the 6 series we executed 9 queries.
+The elapsed times are reported 
+in Tables~\ref{1-small-random}- \ref{5-small-random}
+ 
+
+
+
+\begin{table}
+\footnotesize
+\begin{tabular}{|l|l|l|l|l|l|l|l|}
+\hline
+& & Serie 1 & Serie 2 & Serie 3 & Serie 4 & Serie 5 & Serie 6\\
+\hline
+& \textbf{Size (n)} & 191672 & 195708 & 142941 & 137257 & 179443 & 177631\\
+\hline
+& \textbf{\# Special Pairs} & 1386964 & 1305974 & 713019 & 968666 & 853435 & 910915\\
+\hline
+\multirow{2}{*}{\textbf{Special Pairs}} & space & 118.6 & 111.3 & 66.4 & 83.2 & 78.6 & 82.1\\
+& cpu time & 617.135 & 482.167 & 264.001 & 356.84 & 313.852 & 328.672\\
+\hline
+\multirow{2}{*}{\textbf{RMQBucket}} & space & 7.5 & 7.6 & 5.6 & 5.3 & 7.0 & 6.9 \\
+& cpu time & 18.256 & 22.043 & 9.154 & 7.457 & 15.479 & 16.264\\
+\hline
+\multirow{2}{*}{\textbf{RMQSt}} & space & 58.8 & 59.9 & 43.8 & 42.1 & 54.9 & 54.4\\
+& cpu time & 429.415 & 517.824 & 269.665 & 250.911 & 342.497 & 334.736\\
+\hline
+\end{tabular}
+\label{allpairs-pre-real}
+\caption{AllPairs - Time (in miliseconds) and space (in Mb megabytes) to preprocess each structure.}
+\normalsize
+
+\end{table}
+
+
+% series reais, tamanho de resposta pequeno.
+% Table 1 - Real serie with small output
+\begin{table}
+\footnotesize
+\begin{center}
+\input{12_dec/real_joined.tex}
+\caption{AllPairs - Real series from 1 to 3}
+\label{allpairs-1-3}
+\end{center}
+\normalsize
+\end{table}
+
+\begin{table}
+\footnotesize
+\begin{center}
+\input{12_dec/real_joined2.tex}
+\caption{AllPairs - Real series from 4 to 6}
+\label{allpairs-4-6}
+\end{center}
+\normalsize
+\end{table}
+
+
+\clearpage
+\subsection{Query Beginning}
+
+\begin{table}
+\footnotesize
+\begin{center}
+\begin{tabular}{|l|l|l|l|l|l|l|}
+\hline
+                      & Serie 1 & Serie 2 & Serie 3 & Serie 4 & Serie 5 & Serie 6\\
+\hline 
+ \textbf{Size (n)} & 191672 & 195708 & 142941 & 137257 & 179443 & 177631\\
+\hline
+\textbf{SpecialPair}  & 6065.59 & 6037.60 & 3385.11 & 4079.29 & 3737.19 & 3968.09\\
+\hline 
+\textbf{RmqBucket}     & 22.881  & 25.91   & 12.64   & 9.86    & 16.54   & 16.61\\
+\hline 
+\textbf{RmqSt}        & 496.331 & 612.21  & 310.42  & 286.18  & 396.57  & 379.23\\
+\hline
+\end{tabular}
+\label{beg-pretimes}
+\caption{Beginnings - Preprocessing time (miliseconds)}
+\end{center}
+\normalsize
+\end{table}
+
+
+
+\begin{table}
+\footnotesize
+\begin{center}
+\input{25_jan/beg_real_joined.tex}
+\caption{Beginnings - Real series from 1 to 3}
+\label{beg-real-1-3}
+\end{center}
+\normalsize
+\end{table}
+
+\begin{table}
+\footnotesize
+\begin{center}
+\input{25_jan/beg_real_joined2.tex}
+\caption{Beginnings - Real series from 4 to 6}
+\label{beg-real-4-6}
+\end{center}
+\normalsize
+\end{table}
+
+% Séries Invertidas
+
+\begin{table}
+\footnotesize
+\begin{center}
+\begin{tabular}{|l|l|l|l|l|l|l|}
+\hline
+                      & Serie 1 & Serie 2 & Serie 3 & Serie 4 & Serie 5 & Serie 6\\
+\hline 
+ \textbf{Size (n)} & 191672 & 195708 & 142941 & 137257 & 179443 & 177631\\
+\hline
+\textbf{SpecialPair}  & 850356 & 928878 & 482417 & 548780 & 812149 & 720781\\
+\hline
+\end{tabular}
+\label{neg-query-am-spair}
+\caption{Beginnings - Amount of special pairs, negative query.}
+\normalsize
+\end{center}
+\end{table}
+
+
+
+\begin{table}
+\footnotesize
+\begin{center}
+\input{01_feb/beg_real_joined.tex}
+\caption{Beginnings - Real series from 1 to 3 (Negative Query)}
+\label{neg-query-beg-1-3}
+\end{center}
+\normalsize
+\end{table}
+
+\begin{table}
+\footnotesize
+\begin{center}
+\input{01_feb/beg_real_joined2.tex}
+\caption{Beginnings - Real series from 4 to 6 (Negative Query)}
+\label{neg-query-beg-1-3}
+\end{center}
+\normalsize
+\end{table}
+
+\begin{table}
+\footnotesize
+\begin{center}
+\input{05_March/large_beginnings1_3.tex}
+\caption{Beginnings - Real series - Large Output 1 to 3}
+\label{beg-large-1}
+\end{center}
+\normalsize
+\end{table}
+
+\begin{table}
+\footnotesize
+\begin{center}
+\input{05_March/large_beginnings4_6.tex}
+\caption{Beginnings - Real series - Large Output 4 to 6}
+\label{beg-large-1}
+\end{center}
+\normalsize
+\end{table}
+
+
+
+\end{document}
+
+\begin{figure}
+\begin{center}
+\input{22_nov/random_s1/joined-tables.tex}
+\caption{serie Aleatória 1 - Saídas Grandes}
+\label{1-large-random}
+\end{center}
+\end{figure}
+\begin{figure}
+\begin{center}
+\input{22_nov/random_s2/joined-tables.tex}\\
+\caption{serie Aleatória 2 - Saídas Grandes}
+\label{2-large-random}
+\end{center}
+\end{figure}
+%Table 3 && Table 4 - Random with large output
+\begin{figure}
+\begin{center}
+\input{22_nov/random_s3/joined-tables.tex}
+\caption{serie Aleatória 3 - Saídas Grandes}
+\label{3-large-random}
+\end{center}
+\end{figure}
+\begin{figure}
+\begin{center}
+\input{22_nov/random_s4/joined-tables.tex} \\
+\caption{serie Aleatória 4 - Saídas Grandes}
+\label{4-large-random}
+\end{center}
+\end{figure}
+% Table 5 - Random with large output
+\begin{figure}
+\begin{center}
+\input{22_nov/random_s5/joined-tables.tex}\\
+\caption{serie Aleatória 5 - Saídas Grandes}
+\label{5-large-random}
+\end{center}
+\end{figure}
+\clearpage
+\begin{figure}
+\begin{center}
+\includegraphics{12_dec/random_s1/graphics.eps}
+\caption{serie Aleatória 1 - Saídas Pequenas}
+\end{center}
+\end{figure}
+\begin{figure}
+\begin{center}
+\includegraphics{12_dec/random_s2/graphics.eps}
+\caption{serie Aleatória 2 - Saídas Pequenas}
+\end{center}
+\end{figure}
+\begin{figure}
+\begin{center}
+\includegraphics{12_dec/random_s3/graphics.eps}
+\caption{serie Aleatória 3 - Saídas Pequenas}
+\end{center}
+\end{figure}
+\begin{figure}
+\begin{center}
+\includegraphics{12_dec/random_s4/graphics.eps}
+\caption{serie Aleatória 4 - Saídas Pequenas}
+\end{center}
+\end{figure}
+\begin{figure}
+\begin{center}
+\includegraphics{12_dec/random_s5/graphics.eps}
+\caption{serie Aleatória 5 - Saídas Pequenas}
+\end{center}
+\end{figure}
+
+
+
+\subsubsection{Séries Aleatórias}
+
+\begin{figure}
+\begin{center}
+\begin{tabular}{|l|l|l|l|l|l|l|}
+\hline
+& & serie 1 & serie 2 & serie 3 & serie 4 & serie 5 \\
+\hline
+& \textbf{Tamanho} & 1048576 & 2097152 & 3145728 & 4194304 & 5242880 \\
+\hline
+& \textbf{Total f-pairs} & 1049258 & 2096726 & 3146401 & 4193473 & 5247841 \\
+\hline
+\multirow{2}{*}{\textbf{Fpair}} & Espaço & 109.7 & 228 & 336.8 & 444.5 & 574.9\\
+& Tempo & 618.336 & 1279.97 & 1976.78 & 2406.85 & 3372.51\\
+\hline
+\multirow{2}{*}{\textbf{RMQBucket}} & Espaço & 23.2 & 45.1 & 71.8 & 93.5 & 116.8\\
+& Tempo & 114.921 & 286.451 & 527.042 & 455.153 & 755.968\\
+\hline
+\multirow{2}{*}{\textbf{RMQSt}} & Espaço & 248.4 & 560.4 & 840 & 1.16GB & 1.46GB \\
+& Tempo & 112.431 & 290.094 & 528.019 & 465.001 & 759.326\\
+\hline
+\end{tabular}
+\caption{Tempo (milesegundos) e espaço(megabytes, ao menos se especificado diferente) de pré-processamento para cada estrutura.}
+\label{pre-random}
+\end{center}
+\end{figure}
+
+
+
+
+\begin{figure}
+\begin{center}
+\includegraphics{22_nov/random_s1/graphics.eps}
+\caption{serie Aleatória 1 - Saídas Grandes}
+\end{center}
+\end{figure}
+\begin{figure}
+\begin{center}
+\includegraphics{22_nov/random_s2/graphics.eps}
+\caption{serie Aleatória 2 - Saídas Grandes}
+\end{center}
+\end{figure}
+\begin{figure}
+\begin{center}
+\includegraphics{22_nov/random_s3/graphics.eps}
+\caption{serie Aleatória 3 - Saídas Grandes}
+\end{center}
+\end{figure}
+\begin{figure}
+\begin{center}
+\includegraphics{22_nov/random_s4/graphics.eps}
+\caption{serie Aleatória 4 - Saídas Grandes}
+\end{center}
+\end{figure}
+\begin{figure}
+\begin{center}
+\includegraphics{22_nov/random_s5/graphics.eps}
+\caption{serie Aleatória 5 - Saídas Grandes}
+\end{center}
+\end{figure}
+% Table 1 && Table 2 - Random with small output
+\clearpage
+\begin{figure}
+\begin{center}
+\input{12_dec/random_s1/joined-tables.tex}
+\caption{serie Aleatória 1 - Saídas Pequenas}
+\label{1-small-random}
+\end{center}
+\end{figure}
+\begin{figure}
+\begin{center}
+\input{12_dec/random_s2/joined-tables.tex}\\
+\caption{serie Aleatória 2 - Saídas Pequenas}
+\label{2-small-random}
+\end{center}
+\end{figure}
+% Table 3 && Table 4 - Random with small output
+\begin{figure}
+\begin{center}
+\input{12_dec/random_s3/joined-tables.tex}
+\label{3-small-random}
+\caption{serie Aleatória 3 - Saídas Pequenas}
+\end{center}
+\end{figure}
+\begin{figure}
+\begin{center}
+\input{12_dec/random_s4/joined-tables.tex} \\
+\label{4-small-random}
+\caption{serie Aleatória 4 - Saídas Pequenas}
+\end{center}
+\end{figure}
+% Table 6 - Random with small output
+\begin{figure}
+\begin{center}
+\input{12_dec/random_s5/joined-tables.tex}\\
+\caption{serie Aleatória 5 - Saídas Pequenas}
+\label{5-small-random}
+\end{center}
+
+
+
+
+
+
+
+
+
