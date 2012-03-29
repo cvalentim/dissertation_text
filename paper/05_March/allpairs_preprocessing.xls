@@ -1,8 +1,0 @@
-			    Serie 1   Serie 2    Serie 3  	 Serie 4     Serie 5      Serie 6
-Special Pairs	space    118.6     111.3      66.4        83.2        78.6         82.1
-Special Pairs	cpu time 617.135   482.167    264.001     356.84      313.852      328.672
-RMQBucket  		space    7.5       7.6        5.6         5.3         7.0          6.9
-RMQBucket		cpu time 18.256    22.043     9.154       7.457       15.479       16.264
-RMQSt			space    58.8      59.9       43.8        42.1        54.9         54.4
-RMQSt			cpu time 429.415   517.824    269.665     250.911     342.497      334.736
-

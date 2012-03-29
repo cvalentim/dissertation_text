@@ -1,6 +1,0 @@
-ends = 16808900 ends_unique = 10473716 delta = 6335184
-ends = 35266762 ends_unique = 22009399 delta = 13257363
-ends = 44390814 ends_unique = 28031870 delta = 16358944
-ends = 54866618 ends_unique = 34820587 delta = 20046031
-ends = 70873171 ends_unique = 44655006 delta = 26218165
-ends = 84960996 ends_unique = 53809522 delta = 31151474

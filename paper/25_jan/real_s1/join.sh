@@ -1,2 +1,0 @@
-#!/bin/bash
-cat beg_result_real_fpair.s1.csv beg_result_real_rmqNaive.s1.csv beg_result_real_rmqSt.s1.csv | python ltable_formater.py > joined-tables.tex

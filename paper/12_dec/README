@@ -1,4 +1,0 @@
-Results of small output size only, we have outputs for random
-series and real series. The real series output is not complete
-automaticly generate since it was polished by hand to fit a limit
-of 9 queries per serie and also to put a significant gap between outputs sizes.
