@@ -205,9 +205,106 @@ para gerar todos os pares com distância \textit{não} menor que $d$ ou, como no
 maior que $d_1$ na primeira dimensão e não menor que $d_2$ na segunda.
 
 
+\subsection{Range Tree}
+\label{rangeTree}
+Uma estrutura Range Tree é uma árvore ordenada que contém uma lista 
+de pontos. Ela permite que todos os pontos dentro de um intervalo sejam
+reportados de forma eficiente. Essa estrutura foi introduzida por Jon Louis 
+Bentley em 1979\cite{lala}. Usualmente elas são usadas para duas ou
+mais dimensões, mas os conceitos que precisamos nesse trabalho são relacionados
+a versão 1D.
+
+Uma Range Tree 1D é uma árvore binária balanceada feita sobre um conjunto
+de pontos, onde os pontos são armazenados nas folhas da árvore. Uma vez
+construida a Range Tree permite que todos os pontos dentro de um intervalo $[i, j]$
+sejam reportados de forma eficiente.  Por exemplo, se temos um conjunto inicial
+de pontos $A = (5, 3, 10, 9, 20)$ poderiamos perguntar quais estão no intervalo
+$[4, 9]$ e a resposta seria o conjunto $\{5, 9\}$. Uma Range Tree 1D sobre um conjunto
+de $n$ pontos pode ser criada em tempo $O(n\log n)$ e responde as consultas em tempo
+$O(\log n + k)$, onde $k$ é o tamanho do conjunto de pontos reportados.
+
+A construção da Range Tree 1D para um conjunto de pontos $P$ de $n$ elementos começa
+ordenando os pontos em $P = \{p_1 \le p_2 \le \ldots \le p_n \}$ de forma crescente.
+Então podemos chamar o seguinte procedimento recursivo {\tt ConstructRangeTree} passando os parâmetro $[1, n]$
+para construir adequadamente a árvore.
+
+
+\begin{figure}
+\fbox {
+
+\begin{minipage}{12 cm}
+
+{\tt ConstructRangeTree}($P$, $low$,$high$)
+  
+\hspace{1cm}  {\bf If} $high = ligh$
+
+\hspace{2cm}      Crie e um $f$ nó (folha) com valor $P[low]$
+
+\hspace{2cm}      Retorne $(P[low], f)$
+
+\hspace{1cm}  Crie um nó $v$ associado ao intervalo $[low, high]$
+  
+\hspace{1cm}  $mid \leftarrow (low + high)/2$
+
+\hspace{1cm}  $(valor_l, T_l) \leftarrow ${\tt ConstructRangeTree}$(P, low, mid)$
+
+\hspace{1cm}  $(valor_r, T_r) \leftarrow ${\tt ConstructRangeTree}$(P, mid + 1, high)$
+
+\hspace{1cm}  Faça $T_l$ ser o filho à esquerda de $v$
+
+\hspace{1cm}  Faça $T_r$ ser o filho à direita de $v$
+
+\hspace{1cm}  $valor_v \leftarrow valor_l$ 
+
+\hspace{1cm}  Salve $valor_v$ em $v$
+
+\hspace{1cm}  Retorne $(valor_v, v)$
+   
+\end{minipage}
+
+}
+\label{constructRangeTree}
+\caption{Procedimento para gerar uma Range Tree sobre um conjunto de pontos $P$}
+\end{figure}
+
+
+Na Figura~\ref{fig:rangeTree} temos um exemplo de árvore.
+A construção gasta tempo $O(n\log n)$ porque é necessário ordenar
+os pontos $P$. Contudo, repare que essa é mesma árvore de chamadas
+recursiva feita pelo algoritmo de ordenação {\tt MergeSort} e não é 
+difícil provar que o espaço total ocupado pela mesma é $O(n)$.
+
+Para reportar os pontos dentro de um dado intervalo
+$[i, j]$ nós procuramos $i$ e $j$ na árvore Range Tree usando 
+os valores armazenados dentro dos nós da árvore como guia para a busca.
+Vamos chamar os caminhos de nós consultados na busca por $i$ e $j$
+de, respectivamente, $v_i$ e $v_j$. Note que tanto $v_i$ quanto $v_j$
+tem tamanho $O(\log n)$, uma vez que a árvore é balanceada. Para
+reportamos todos os nós entre $[i, j]$ precisamos de um terceiro nó
+dá árvore, $v_{split}$, que é o último vértice que os caminhos $v_i$
+e $v_j$ têm em comum. Para todo nó $v$ no caminho de $v_{split}$ até o 
+final de $v_i$ verifique se o valor dentro dele é maior que $i$, se 
+for, reporte todos os pontos na subárvore à direita de $v$. Se $v$
+for uma folha, verifique se $v$ está no intervalo $[i, j]$ antes
+antes de reportar. De forma similar, reporte todos os nós em 
+subárvores à esquerda dos nós de $v_{split}$ até o fim de $v_j$
+que têm valores menores que $j$.  
+
+
+\begin{figure}[htp]
+\begin{center}
+\includegraphics[scale=0.5]{range_tree.png}
+\caption{Uma Range Tree para o conjunto de $n=13$ pontos}
+\label{fig:rangeTree}
+\end{center}
+\end{figure}
+
+
+
 \subsection{Organização da Dissertaçao}
-COMECEI A ORGANIZAR AQUI 
+
 \section{Conceitos Básicos}
+
 
 Nessa seção nós apresentamos observações/resultados que são úteis para tratar
 tanto a consulta $AllPairs(t, d)$ quanto para o $Beginnings(t, d)$.
@@ -360,10 +457,12 @@ $S$ pode ser construido em tempo $O(|S| + n)$.
 
 \section{Estruturas de Dados para Detecção de Variações Rápidas em Séries Temporais - AllPairs}
 
-\subsection{Lista Ordenada}
+\subsection{AllPairs-Lista}
 
-Uma estratégia simples é armazenar um vetor com $n$ listas $\{L_1, \ldots, L_n\}$ e na lista $L_x$ colocar os valores $\{(1, m_1), (2, m_2), \ldots, (n-1, m_{n-1})\}$, onde $m_i$ é o índice do maior elemento de maior valor do intervalo $[i, i + x]$. Cada lista é internamente ordenada de forma decrescente por desvio. Com essa estrutura em memória poderiamos responder uma consulta $(t, d)$ percorrendo e reportando os pares na lista $L_t$ enquanto o valor do par corrente é maior que ou igual a $d$. Essa estratégia responde consultas de forma bastante eficiente, em tempo $O(k + 1)$, onde $k$ é a quantidade de pares reportados e, além disso, é bastante simples de entender e implementar. Por outro lado, acreditamos que o espaço em memória necessário para implementá-la é proibitivo, uma vez é preciso sempre armazenar 
-os $\Omega(n^2)$ pares.  
+Uma estratégia simples é armazenar um vetor com $n$ listas $\{L_1, \ldots, L_n\}$ e na lista $L_x$ colocar os valores 
+$\{(1, m_1), (2, m_2), \ldots, (n-1, m_{n-1})\}$, onde $m_i$ é o índice do maior elemento de maior valor do intervalo $[i, \ldots, i + x]$. 
+Cada lista é internamente ordenada de forma decrescente por desvio. 
+Com essa estrutura em memória poderiamos responder uma consulta $(t, d)$ percorrendo e reportando os pares na lista $L_t$ enquanto o valor do par corrente é maior que ou igual a $d$. Essa estratégia responde consultas de forma bastante eficiente, em tempo $O(k + 1)$, onde $k$ é a quantidade de pares reportados e, além disso, é bastante simples de entender e implementar. Por outro lado, acreditamos que o espaço em memória necessário para implementá-la é proibitivo, uma vez é preciso sempre armazenar os $\Omega(n^2)$ pares.  
 
 \subsection{AllPairs-RMQ}
 
@@ -384,33 +483,37 @@ pode ser indesejável para séries muito grandes. Na próxima seção apresentam
 uma estrutura baseada no conceito de pares especiais, essa estrutura busca
 melhor equilíbrio entre tempo e espaço de pré-processamento e consulta. 
 
-\subsection{Abordagem baseada em Pares Especiais}
+\subsection{AllPairs-SP}
 
-Seja $S$ o conjunto de pares especiais de uma série temporal $A = (a_1, \ldots, a_n)$. 
-Nossa solução armazena $S$, ordenado de forma crescente pelos valores $\Delta$, em 
-um vetor $V$ e empates são decididos arbitrariamente e $M$ um vetor tal que a posição
-$i$ guarda o índice do par mais a direita em $V$ com seu desvio menor ou igual a $i$.
-Por exemplo, se $A = (3, 4, 5, 1)$ teremos $S = \{(1, 2), (2, 3), (1, 3)\}$,
-$V = [(1, 2), (2, 3), (1, 3)]$ e, finalmente, $M = [2, 3]$. Repare que é possível construir
-tanto o vetor $V$ quanto o vetor $M$, a partir de $S$, em tempo $O(|S|)$.
+Essa abordagem é baseada no conceito de pares especias apresentado.
 
+\textbf{Pré-processamento.} Primeiro, geraramos o conjunto $S$ de pares especiais da série de entrada $A = (a_1, \ldots, a_n)$,
+isso é feito chamando o procedimento~\ref{fig:GenSpecialPairs}. Então a partir de $S$ criamos um vetor $V$ que
+contém os pares em $S$ ordenados de forma crescente por valor-$\Delta$, empates na ordenação são decididos arbitrariamente. 
+Além disso, precisamos de um vetor $M$ onde a posição $i$ guarda o índice do par mais a direita em $V$  com desvio menor ou igual a $i$.
+Repare que é possível construir tanto o vetor $V$ quanto o vetor $M$, a partir de $S$, em tempo $O(|S|)$.
+Finalmente, criamos três estruturas de {\tt RMQ}, a primeira, ${\cal D}$ é criada sobre o vetor $V$ e tem tamanho 
+$O(|S|)$(foot note) e a utilizamos para responder a seguinte consulta: Dados dois valores $t^*$ e $d^*$, 
+reporte o subconjunto de pares especiais de $S$ com valor-$\Delta$ de até $t^*$ e desvio de ao menos $d^*$. 
+Já as outras duas, ${\cal D}_{min}$ e ${\cal D}_{max}$ têm tamanho $O(n)$ e são usadas para podermos chamar, 
+respectivamente, os procedimentos {\tt GenEventsEnd} e {\tt GenEventsStart} sobre a série $A$. 
 
-Além disso, nossa estrutura utiliza uma RMQ ${\cal D}$ sobre o vetor $V$ de tamanho $O(|S|)$ para responder a seguinte consulta:
- dado dois valores $t^*$ e $d^*$, reporte o subconjunto de pares especiais de $S$ com valor-$\Delta$ de até $t^*$ e 
-desvio de ao menos $d*$. Finalmente, nos usamos outras duas RMQ auxiliares ${\cal D}_{min}$ e 
-${\cal D}_{max}$ de tamanho $O(n)$ para podermos charmar, respectivamente, os procedimentos {\tt GenEventsEnd}
-e {\tt GenEventsStart} sobre $A$. 
+Em um exemplo, se $A = (3, 4, 5, 1)$ teremos $S = \{(1, 2), (2, 3), (1, 3)\}$, $V = [(1, 2), (2, 3), (1, 3)]$ e, 
+finalmente, $M = [2, 3]$. 
 
-Para responder a consulta $AllPairs(t, d)$ nos executamos duas fases. Na primeira, 
+Com isso, o tempo e espaço de pré-processamento são $O(|S| + n)$.
+
+\textbf{Consulta.} Para responder a consulta $AllPairs(t, d)$ nos executamos duas fases. Na primeira, 
 nos encontramos todos os eventos-$(t,d)$ especiais de $V$ usando a RMQ ${\cal D}$ e o vetor $M$.
 Então, na segunda fase, nós usamos esses eventos-$(t,d)$ especiais e as estruturas 
 ${\cal D}_{min}$ e ${\cal D}_{max}$ para encontrar os outros eventos-$(t,d)$. As duas fases
-são apresentadas em detalhes abaixo.
+são detalhadas abaixo.
 
 \textbf{Fase 1}. Seja $k^*$ o índice do último par em $V$ entre aqueles com valor-$\Delta$
 de até $t$. Nós usamos ${\cal D}$ para executar consultas de máximos em intervalos para
-encontrar os eventos-$(t,d)$ em $V[1, \ldots, k^*]$. De forma mais precisa, seja $i$ o índice
-de $V$ o índice de $V$ retornado por uma consulta de máximo em $V$ entre os elementos de
+encontrar os eventos-$(t,d)$ em $V[1, \ldots, k^*]$ (Note que $k^*$ pode ser facilmente
+descoberto através do vetor $M$). De forma mais precisa, seja $i$ o índice
+de $V$ retornado por uma consulta de máximo em $V$ entre os elementos de
 índice $[1, k^*]$. Se o desvio do par armazenado em $V[i]$ é menor que $d$ nós podemos
 terminar a busca, já que nenhum outro par em $V[1, \ldots, k^*]$ terá desvio de ao menos $d$.
 Caso contrário, adicionamos o par $V[i]$ a lista ${\cal L}$ e proseguimos recursivamente 
@@ -450,9 +553,8 @@ note que a chamada inicial do procedimento deverá ser {\tt GeraEventosEspecias}
 
 \textbf{Fase 2}. Esta fase pode ser dividida em duas etapas.
 
-\textbf{Fase 2.1}. Nessa subfase, geramos o conjunto de inícios de todos os eventos-$(t,d)$ (
-não só os especias, como na última fase).
-Primeiro, nós geramos a lista ${\cal E}_L$ de fins em ${\cal L}$, o que
+\textbf{Fase 2.1}. Nessa subfase, geramos o conjunto de inícios distintos de todos os eventos-$(t,d)$.
+Primeiro, nós geramos a lista ${\cal E}_L$ de fins de eventos-$(t,d)$ especiais em ${\cal L}$, o que
 pode ser feito em $O(|L|)$ mantendo-se um vetor de $0-1$ para evitar repetições de fins. Então,
 chamamos o procedimento {\tt GenEventsEnd}$(j, j - t, j - 1)$ para todo $j \in {\cal E}_L$. É 
 importante lembrar que {\tt GenEventsEnd} utiliza a estrutura ${\cal D}_{min}$. Durante o processamento
@@ -473,51 +575,55 @@ e com $O(|S| + n)$ de espaço e tempo de pré-processamento.
 \begin{proof}
 No final da Fase 1, nós temos todos os eventos-$(t,d)$ especias,
 isto é feito em tempo $O(k)$. No começo da Fase 2.1,
-obtemos o conjunto $E_{\cal{L}}$ contendo os fins distintos,
+obtemos o conjunto $E_{\cal{L}}$ contendo os fins distintos dos eventos-$(t,d)$ especias,
 novamente em tempo $O(k)$. Pelo item (ii) do Lema~\ref{lem:SpecialPairsProperty}
 o conjunto $B$ contendo todos os inícios de eventos-$(t,d)$ pode ser gerado a partir
-dos fins em $E_{\cal{L}}$. Nós obtemos o conjunto $B$ em tempo $O(K)$ chamando o {\tt GenEventsEnd}$(j,j-t,j-1)$
+dos fins em $E_{\cal{L}}$. Nós obtemos o conjunto $B$ em tempo $O(k)$ chamando o {\tt GenEventsEnd}$(j,j-t,j-1)$
 para cada $j \in E_{\cal{L}}$. Finalmente, gastamos mais $O(k)$ para gerar todos os eventos-$(t,d)$
-chamando {\tt GenEventsStart}$(i,i+1,i+t)$ para cada $i \in B$.
+chamando {\tt GenEventsStart}$(i,i+1,i+t)$ para cada índice $i \in B$.
 \end{proof}
 
 
-\section{Beginnings}
+\section{A consulta Beginnings$(t,d)$}
 
-Nessa seção 
+Nessa seção exploramos estratégias para o problema $Beginnings(t,d)$.
 
-\subsection{Estrutura baseada em Pares Especiais}
+\subsection{Algoritmo Beg-RMQ}
+Esse algoritmo é muito similar ao AllPairs-RMQ, no pré-processamento
+criamos uma estrtura de RM(ax)Q em tempo $O(n)$. Para responder a consulta
+nós passamos sobre a série $A$ e para cada índice $i$ usamos a estrutura
+de RMQ decidir se $\max\{a_j | i < j \le j + t\}$ é maior ou igual a $a_i + d$,
+em caso positivo, adicionamos $i$ a lista de soluções.
 
-Para explicar nossa estrutura precisamos introduzir novas notações.
+\subsection{Algoritmo Beg-SP}
+
+Aqui exploramos um algoritmo baseado no conceito de pares especias para
+o problema $Beginnings(t,d)$.
+
+Para explicar nossa estrutura precisamos introduzir a seguinte notação.
 Para um intervalo $[i, j]$, definimos $S_{[i,j]}$ como o conjunto
-de pares especiais cujos valores-$\Delta$ estão dentro do intervalo $[i, j]$.
-Seja $L_{[i, j]}$ a lista obtida como segue: primeiro ordenamos os pares
-em $S_{[i, j]}$ em ordem decrescente de seus desvios. Depois, passamos na lista
-e removemos os pares especiais sempre que seu final já apareceu como final de outro
+dos pares especiais cujo valor-$\Delta$ está dentro do intervalo $[i, j]$,
+e $L_{[i, j]}$ como a lista obtida a partir de $S_{[i,j]}$ da seguinte forma:
+ primeiro ordenamos os pares em $S_{[i, j]}$ em ordem decrescente de seus desvios. Depois, passamos em $S_{[i,j]}$
+e só adicionamos a lista $L_{[i,j]}$ os pares especiais tal que seu final não apareceu como final de outro
 par especial na lista.
 
-Para responder a consulta $Beginnings(t,d)$ precisamos de uma árvore binária ordenada ${\cal T}$
-onde cada nó é associado a um subintervalo de $[1, n - 1]$. Mais precisamente, a raiz de ${\cal T}$
-é associada ao intervalo $[1, n - 1]$. Se um nó $v$ é associado com o intervalo $[i, \ldots, j]$ então
-seu filho à esquerda é associado ao intervalo $[i, \lceil \frac{(i + j)}{2} \rceil]$ e seu filho à direita associado
-a $[\lceil \frac{(i + j)}{2} \rceil  + 1, j]$. Além disso, cada nó de ${\cal T}$ aponta para a lista associada a seu intervalo, isto é, o nó $v$ associado com o intervalo $[i, j]$ aponta para a lista $L_{[i, j]}$. A Figura\ref{alla}
-mostra um exemplo para séries temporais com $n = 8$ elementos. O tamanho da estrutura é $O(\min\{n^2, |S|\log n\})$ porque cada par especial pode aparecer em até $\log n$ listas $L_{[i, j]}$ e o tamanho de cada lista
+\textbf{Pré-processamento.} Primeiro geramos o conjunto de pares especias $S$, novamente
+isso é feito a partir do procedimento~\ref{fig:GenSpecialPairs}. Em seguida, precisamos 
+de uma árvore binária ordenada ${\cal T}$ onde cada nó é associado a um dado subintervalo de $[1, n - 1]$. 
+Mais precisamente, a raiz de ${\cal T}$ é associada ao intervalo $[1, n - 1]$. Se um nó $v$ é associado com o intervalo 
+$[i, \ldots, j]$ então seu filho à esquerda é associado ao intervalo $[i, \lceil \frac{(i + j)}{2} \rceil]$ e seu filho à direita associado
+a $[\lceil \frac{(i + j)}{2} \rceil  + 1, j]$. Além disso, cada nó de ${\cal T}$ aponta para a lista $L$ associada a seu intervalo,
+ isto é, o nó $v$ associado com o intervalo $[i, j]$ aponta para a lista $L_{[i, j]}$. Essa árvore é de fato uma
+ Range Tree modificada onde cada nó tem um ponteiro adicional para a lista $L_{[i, j]}$, sendo assim, a construção
+ da mesma é bastante similar a descrita na Seção~\ref{rangeTree} notando que a lista de pontos nesse caso é 
+ a lista de pares especias ordenados por seus valor-$\Delta$ e na construção de cada nó há um processamento extra remover
+ os fins repetidos e criar a lista $L_{[i, j]}$.
+
+ A Figura~\ref{figu:binary_tree} mostra um exemplo para séries temporais com $n = 8$ elementos. 
+ 
+O tamanho da estrutura é $O(\min\{n^2, |S|\log n\})$ porque cada par especial pode aparecer em até $\log n$ listas $L_{[i, j]}$ e o tamanho de cada lista
 é no máximo $n$, uma vez que cada fim aparece no máximo uma vez.
-
-Para responder a consulta $Beginnings(t,d)$ o procedimento executa duas fases. Na primeira, 
-ele obtém todos os fins de eventos-$(t,d)$ especiais. Na segunda fase, usa os fins para obter
-os inícios dos eventos-$(t,d)$.
-
-A corretude desse procedimento é baseada no item $(ii)$ do Lema~\ref{ala} porque se $i$ é um
-início de um evento-$(t,d)$ então existe um fim $j*$ de um evento-$(t,d)$ especial tal que $(i, j*)$
-é um evento-$(t,d)$. E, como será visto, o fim $j*$ é achado na Fase1 e usado para achar $i$ na Fase2.
-
-\textbf{Fase 1}. Primeiramente, achamos o conjunto $S$ de nós em ${\cal T}$ cujos intervalos associados
-formam uma partição do intervalo $[1, t]$. No exemplo da Figura 2, para $t = 6$, $S$ consiste de 
-dois nós: um associado ao intervalo $[1, 4]$ e outro com o intervalo $[5, 6]$. Pode ser mostrado 
-que é sempre possível achar em tempo $O(\log n)$ um conjunto $S$ com até $\log t$ nós. Uma forma
-de ver isto é perceber que ${\cal T}$ é exatamente a primeira camada de uma \textit{Range Search Tree 2D}
-(\cite{alla}).
 
 \begin{figure}[htp]
 \begin{center}
@@ -528,9 +634,26 @@ e a direita, respectivamente, têm ponteiros para $L_{[1,4]}$ e $L_{[5,7]}$. }
 \end{center}
 \end{figure}
 
-Então, para cada nó $v \in S$,  procedemos como segue: percorremos a lista de pares especiais associada
-com $v$; se o par especial atual tem desvio maior ou igual a $d$, nós verificamos se seu final já foi a adicionado a lista de finais $E_f$. Se não foi, nós adicionamos o final a $E_f$; caso contrário, nós seguimos
-em frente. O percorrimento é interompido quando encontramos um par especial com desvio menor que $d$
+
+\textbf{Consulta.}
+Para responder a consulta $Beginnings(t,d)$ o procedimento executa duas fases. Na primeira, 
+ele obtém todos os fins de eventos-$(t,d)$ especiais. Na segunda fase, usa os fins para obter
+os inícios dos eventos-$(t,d)$.
+
+A corretude desse procedimento é baseada no item $(ii)$ do Lema~\ref{mainlem} porque se $i$ é um
+início de um evento-$(t,d)$ então existe um fim $j*$ de um evento-$(t,d)$ especial tal que $(i, j*)$
+é um evento-$(t,d)$. E, como será visto, o fim $j*$ é achado na Fase 1 e usado para achar $i$ na Fase 2.
+
+\textbf{Fase 1}. Primeiramente, achamos o conjunto $P$ de nós em ${\cal T}$ cujos intervalos associados
+formam uma partição do intervalo $[1, t]$. No exemplo da Figura 2, para $t = 6$, $S$ consiste de 
+dois nós: um associado ao intervalo $[1, 4]$ e outro com o intervalo $[5, 6]$. Relembre da seção
+de Range Tree que se tomarmos os nós no caminho de busca de $t$ na árvore adequadamente 
+achamos um conjunto $P$ em tempo $O(\log n)$ com até $\log t$ nós.
+ 
+Então, para cada nó $v \in P$,  procedemos como segue: percorremos a lista de pares especiais associada
+a $v$; se o par especial atual tem desvio maior ou igual a $d$, nós verificamos se seu final já foi a adicionado a lista de finais $E_f$.
+ Se não foi, nós adicionamos o final a $E_f$; caso contrário, descartamos o par e seguimos em frente.
+  O percorrimento é abortado quando encontramos um par especial com desvio menor que $d$
 ou chegamos ao final da lista. Esse passo custa no máximo $O(|E_f| \log t)$ porque cada final aparece no máximo
 em $\log t$ listas.
 
@@ -541,7 +664,7 @@ usando ou um \textbf{bucket sort} ou um \textbf{heapsort} dependendo se $|E_f|$ 
 não. Seja $e_1 < e_2 < \ldots < e_f$ os fins em $E_f$ ordenados.
 
 \textbf{Fase 2.2}. Primeiro, defina, para um fim $e_j \in E_f$, a função $clp(e_j) = e_{i*}$,
-onde $i = \max\{i|e_i \in E_f \text{e} e_i < e_j \text{e} a_{e_i} \ge a_{e_j}\}$. De outra forma,
+onde $i = \max\{i|e_i \in E_f \text{ e } e_i < e_j \text{ e } a_{e_i} \ge a_{e_j}\}$. De outra forma,
 $clp(e_j)$ retorna o fim a esquerda de $e_j$, que tem índice menor que $e_i$ e valor maior ou 
 igual a $a_{e_j}$. Para garantir que todo $clp(e_j)$, para $j = 1, \ldots, |E_f|$, é válido nós
 assumimos que $E_f$ contém um elemento artificial $e_0$ tal que $e_0 = 0$ e $a_{e_0} = \inf$.
@@ -581,7 +704,7 @@ em tempo $O(\log n + f.(\log f + \log t) + k)$, onde $k$ é o tamanho do conjunt
 
         CurrentHigh $\leftarrow e_f -1$
 
-        {\bf  For} $i=f $ downto 1.
+        {\bf  For} $i=f $ até 1.
 
         \hspace{1cm} {\tt GenEventsEnd } $(e_i, \max \{e_i -t, clp(e_i)\}, CurrentHigh)$
 
@@ -599,12 +722,12 @@ em tempo $O(\log n + f.(\log f + \log t) + k)$, onde $k$ é o tamanho do conjunt
 
 \end{figure}
 
+
 É importante ressaltar que, com algum esforço, é possível reduzir o fator 
 $\log f$ na complexidade acima. A ideia principal é criar uma estrutura de RMQ
 para cada lista $L_{i,j}$ e ordenar pares especiais em  $L_{i, j}$ pelo seus fins
 e não por seu desvio. Desta forma, conseguimos trocar a ordenação na fase 2.1 
-uma operação mais rápida de merge. EXPLICAR EM DETALHES.
-
+uma operação mais rápida de merge. !!! EXPLICAR EM DETALHES?
 
 \subsubsection{Calculando os $clp$s}
 A Figura~\ref{fig:clp} mostra o pseudo-código do procedimento
@@ -623,15 +746,15 @@ o loop {\bf While} também leva tempo linear.
 
         \small
 
-        $Q \leftarrow \emptyset $; Add $e_f$ to the tail of queue $Q$.
+        $Q \leftarrow \emptyset $; Adicione $e_f$ no final da fila $Q$.
 
-        {\bf  For} $i=f-1 $ downto 0.
+        {\bf  For} $i=f-1 $ até 0.
 
         \hspace{1cm} $e \leftarrow Q.tail$
 
         \hspace{1cm} {\bf While} $a_e  < a_{ e_i} $
 
-        \hspace{2cm} Remove $e$ from $Q$
+        \hspace{2cm} Remova $e$ de $Q$
 
         \hspace{2cm} $clp(e) \leftarrow e_i$ 
 
@@ -639,7 +762,7 @@ o loop {\bf While} também leva tempo linear.
 
         \hspace{1cm} {\bf End While}
 
-        \hspace{1cm} Add $e_i$ to the tail of $Q$.
+        \hspace{1cm} Adicione $e_i$ no final da fila $Q$.
 
         {\bf End For}
 
@@ -647,7 +770,7 @@ o loop {\bf While} também leva tempo linear.
 
 } % close fbox
 
-\caption{Procedure to generate the clp's}
+\caption{Procedimento para gerar clp}
 
 \label{fig:clp} 
 
@@ -656,6 +779,30 @@ o loop {\bf While} também leva tempo linear.
  \end{figure}
  %\end{minipage}
 
+
+\subsection{Algoritmo Beg-Hybrid}
+
+Uma outra forma de responder a consulta $Beginnings$ é combinar o algoritmo 
+$AllPairs-SP$ e o $Beg-SP$ como segue. 
+
+No pré-processamento, execute a fase de pré-processamento do $AllPairs-SP$, pulando
+a construção da estrutura ${\cal D}_{max}$. Para responder uma dada consulta,
+primeiro execute a fase 1 do $AllPairs-SP$, lembrando que ao final dessa fase
+temos a lista ${\cal L}$ contendo todos os eventos-$(t,d)$ especiais. Em seguida,
+passe na lista ${\cal L}$ e encontre os fins distintos de eventos-$(t,d)$ especiais e
+aplique a fase 2 do $Beg-SP$. 
+
+A principal motivação dessa estratégia, como comparada com o $Beg-SP$, é a economia
+do fator $\log n$ no espaço de pré-processamento. Outra vantagem é o uso da mesma
+estrutura do $AllPairs-SP$ de forma que ambas consultas, $AllPairs$ e $Beginnings$,
+podem ser respondidas com a mesma estrutura de dados. A desvantagem, contudo,
+é que essa estrutura tem tempo de consulta $O(k\min{t,f})$ ao invês do 
+$O(\log n + f.(\log f + \log t) + k)$ da $Beg-SP$, onde $k$ é o tamanho
+do conjunto solução e $f$ é o número de fins distintos de eventos-$(t,d)$
+especias.
+
+A corretude dessa estratégia segue diretamente da corretude das duas
+estruturas usadas.
 
 \section{Quantidade Pares Especiais}
 
@@ -844,18 +991,16 @@ séries originais.
 
 \subsubsection{Pré-processamento}
 Nessa seção reportamos os experimentos realizados para a consulta $AllPairs(t,d)$.
-Nós comparamos nossa estrutura baseada em Pares Especiais com a estratégia simples onde para cada possível
-início utiliza-se o procedimento {\tt GenEventsStart} para encontrar os eventos-$(t,d)$ com o dado início,
-chamaremos essa estratégia de {\tt SimpleRMQ}.
+Nós comparamos a estrutura AllPairs-SP, baseada em Pares Especiais, com a  {\tt AllPairs-RMQ}.
 
 Um ponto importante na comparação entre as duas estruturas é a implementação de RMQ usada pela estratégia. 
-Entre as duas implementações principais, {\tt RMQBucket} e {\tt RMQSt}, partições se mostrou a única víavel para 
-nossa estratégia baseada em pares especiais, devido ao alto consumo de memória da implementação {\tt RMQSt}.
-Já para a {\tt SimpleRMQ} apresentamos resultados com as duas implementações.
+Entre as duas implementações principais, {\tt RMQBucket} e {\tt RMQSt}, a implementação {\tt RMQBucket} se mostrou melhor para 
+a estratégia {\tt AllPairs-SP}, devido ao alto consumo de memória da implementação {\tt RMQSt}.
+Já para a {\tt AllPairs-RMQ} apresentamos resultados com as duas implementações.
 
 Na primeira tabela mostramos os tempos de pré-processamento de cada estrutura, os tempos são a média 30 execuções.
-Nossa estrutura apresenta o maior tempo de pré-processamento,  sendo de 1.3 a 2 vezes mais lenta que a {\tt SimplesRMQ}
- com {\tt RMQBucket} e entre $9$ e $20$ vezes mais lenta que a {\tt SimplesRMQ}  com {\tt RMQSt}.
+Nossa estrutura apresenta o maior tempo de pré-processamento,  sendo de 1.3 a 2 vezes mais lenta que a {\tt AllPairs-RMQ}
+ com {\tt RMQBucket} e entre $9$ e $20$ vezes mais lenta que a {\tt AllPairs-RMQ}  com {\tt RMQSt}.
 
 
 \begin{table}
@@ -863,7 +1008,7 @@ Nossa estrutura apresenta o maior tempo de pré-processamento,  sendo de 1.3 a 2
 \begin{center}
 \begin{tabular}{|c|c|c|c|c|c|}
 \hline
-\textbf{n} & \textbf{tamanho} & \textbf{pares especiais} & \textbf{SimpleRMQBucket} & \textbf{SimpleRMQSt} & \textbf{PS}\\
+\textbf{n} & \textbf{tamanho} & \textbf{quantidade de pares especiais} & \textbf{AllPairs-RMQBucket} & \textbf{AllPairs-RMQSt} & \textbf{AllPairs-SP}\\
 \hline
 1 & 191672 & 1382715 & 6.68222 & 32.8353 & 366.433\\
 \hline
@@ -915,7 +1060,7 @@ sequência de pesquisas, acreditamos que nossa abordagem é a melhor escolha.
 \begin{center}
 \begin{tabular}{|c|c|c|c|c|c|c|c|}
 \hline
-\textbf{n} & \textbf{size} & \textbf{\# sp} & \textbf{SimpleRMQBucket} & \textbf{SimpleRMQSt} & \textbf{RangeList} & \textbf{AllPairs}\\
+\textbf{n} & \textbf{size} & \textbf{\# sp} & \textbf{Beg-RMQBucket} & \textbf{Beg-RMQSt} & \textbf{Beg-SP} & \textbf{Beg-Hybrid}\\
 \hline
 1 &  191672 & 1382715 & 6.93663 & 39.6547 & 5871.28 & 377.26\\
 \hline
@@ -951,6 +1096,215 @@ sequência de pesquisas, acreditamos que nossa abordagem é a melhor escolha.
 
 
 
+\appendix
+
+
+\section{Prova da Proposição \ref{prop:tail}}
+\begin{proof}
+
+\noindent A desigualdade de Chebyshev mostra que se  $X$ é uma variável aleatória com valor esperado $E[X]$ e variância $Var[X]$,
+então $Pr\{ |X - E[X]| \geq c \} \leq \frac{Var[X]}{c^2}$, para qualquer constante positiva $c$ dada.
+Considerando que, por definição,  $Var[X] = E[X^2] - E[X]^2$, e multiplicando $c$ por $E[x]$ na desigualdade anterior, nós temos que 
+$Pr\{ |X - E[X]| \geq c E[X] \} \leq \frac{E[X^2] - E[X]^2}{c^2 E[X]^2}$.
+
+Para formar a desigualdade de Chebyshev é preciso determinar $E[X]^2$ e $E[X^2]$.
+
+Pela proposição 1, segue que $E[X]^2 = (n - H_{n})^2$.
+
+Por definição, $E[X^2] = E [( \sum\limits_{i=1}^{n-1} \sum\limits_{j=i+1}^{n} X_{i,j})^2]$.
+Sendo assim, pela linearidade do valor esperado, $E[X^2] = ( 2 \sum\limits_{i=1}^{n-1} \sum\limits_{j=i+1}^{n}
+\sum\limits_{k=i+1}^{n-1} \sum\limits_{l=k+1}^{n} E[X_{i,j} X_{k,l}] ) +
+( \sum\limits_{i=1}^{n-1} \sum\limits_{j=i+1}^{n} E[(X_{i,j})^2] )$.
+
+Agora precisamos calcular $E[X^2]$. Isso pode ser feito em seis casos disjuntos.
+
+Em cada um dos casos abaixo nós assumimos que o produto de todo par de variáveis
+aleatórias $X_{i, j}$ e $X_{k,l}$ é representado pela intersecção de dois
+intervalos fechados $[i,j]$ e $[k,l]$, onde $[i,j] = \{p | i \leq p \leq j \}$
+e $[k,l] = \{q | k \leq q \leq l \}$.
+
+Além disso, com algum abuso de notação, nós assumimos que em cada um dos casos que a expressão
+ $E[X_{i,j} X_{k,l}]$ denota $\sum\limits_{i}\sum\limits_{j >i}\sum\limits_{k \geq i}\sum\limits_{l > k} E[X_{i,j} X_{k,l}]$, 
+ onde $[i,j]$ e $[k,l]$ são pares de intervalos que pertencem ao caso em questão.
+
+{\bf Caso 1:} Intervalos $[i, j]$ e $[k, l]$ são idênticos.
+
+$E[X_{i,j} X_{k,l}] = E[X_{i,j} X_{i,j}] = E[X_{i,j}] = \sum\limits_{i=1}^{n-1} \sum\limits_{j=i+1}^{n}
+\frac{1}{(j-i+1)(j-i)} = n - H_n$
+
+\vspace{0.5cm}
+
+
+{\bf Caso 2a:} Intervalos $[i, j]$ e $[k, l]$ são disjuntos:
+
+$E[X_{i,j} X_{k,l}] = \sum\limits_{i=1}^{n-3} \sum\limits_{j=i+1}^{n-2}
+\sum\limits_{k=j+1}^{n-1} \sum\limits_{l=k+1}^{n} \frac{1}{(j-i+1)(j-i)(l-k+1)(l-k)} = $
+
+$\sum\limits_{i=1}^{n-3} \sum\limits_{j=i+1}^{n-2}  \left[ \frac{1}{(j-i+1)(j-i)}
+\left( \sum\limits_{k=j+1}^{n-1} \sum\limits_{l=k+1}^{n} \frac{1}{(l-k+1)(l-k)} \right) \right] =  $
+
+$\sum\limits_{i=1}^{n-3} \sum\limits_{j=i+1}^{n-2} \frac{(n - j) - H_{(n - j)}} {(j-i+1)(j-i)} 
+= \alpha(n) - \beta(n) - \gamma(n)$, onde
+
+$\alpha(n) = \sum\limits_{i=1}^{n-3} \sum\limits_{j=i+1}^{n-2} \frac{n} {(j-i+1)(j-i)}$,
+$\beta(n) = \sum\limits_{i=1}^{n-3} \sum\limits_{j=i+1}^{n-2} \frac{j} {(j-i+1)(j-i)}$ and 
+$\gamma(n) =  \sum\limits_{i=1}^{n-3} \sum\limits_{j=i+1}^{n-2} \frac{H_{(n - j)}} {(j-i+1)(j-i)}$
+%\sum\limits_{i=1}^{n-3} \sum\limits_{j=i+1}^{n-2} \frac{n-j} {(j-i+1)(j-i)}
+
+Vamos primeiro calcular $\alpha(n)$:
+
+$\alpha(n) = \sum\limits_{i=1}^{n-3} \sum\limits_{j=i+1}^{n-2} \frac{n} {(j-i+1)(j-i)}
+= n^2 - 2n - H_{(n-2)}$
+
+Pela definição de $\beta(n)$, segue que:
+
+$\beta(n) = \sum\limits_{i=1}^{n-3} \sum\limits_{j=i+1}^{n-2} \frac{j} {(j-i+1)(j-i)}
+= \sum\limits_{i=1}^{n-3} \left( \sum\limits_{j=i+1}^{n-2} \frac{j}{(j-i)} - \frac{j} {(j-i+1)} \right)$
+
+$\beta(n) = \sum\limits_{i=1}^{n-3} \left[ \left( \frac{i+1}{1} +  \frac{i+2}{2} + \ldots + \frac{n-2}{n-i-2} \right)
+- \left( \frac{i+1}{2} +  \frac{i+2}{3} + \ldots + \frac{n-2}{n-i-1} \right) \right]$
+
+$\beta(n) = \sum\limits_{i=1}^{n-3} \left[
+\frac{i+1}{1}  + \left( \frac{1}{2} +  \frac{1}{3} + \ldots + \frac{1}{n-i-2} \right)
+- \frac{n-2}{n-i-1} \right]
+= \sum\limits_{i=1}^{n-3} \left( i + H_{(n-2)} - \frac{n-i-2}{n-i-1} \right)$
+
+$\beta(n) = \frac{(n-3)(n-2)}{2} + \sum\limits_{i=1}^{n-3} H_{i} - \sum\limits_{i=2}^{n-2} \frac{n-2}{i}$
+
+$\beta(n) = \frac{n^2}{2} - \Theta(n \log n)$.
+
+De forma similar, um limite justo pode ser determinado para $\gamma(n)$:
+
+$\gamma(n) =  \sum\limits_{i=1}^{n-3} \sum\limits_{j=i+1}^{n-2} \frac{H_{(n - j)}} {(j-i+1)(j-i)}
+\leq  \sum\limits_{i=1}^{n-3} \sum\limits_{j=i+1}^{n-2} \frac{H_{n}} {(j-i+1)(j-i)}
+\leq  n . H(n) = O(n \log n) $
+
+$\gamma(n) =  \sum\limits_{i=1}^{n-3} \sum\limits_{j=i+1}^{n-2} \frac{H_{(n - j)}} {(j-i+1)(j-i)}
+\geq  \sum\limits_{i=1}^{\frac{n-2}{2} - 1} \sum\limits_{j=i+1}^{\frac{n-2}{2}} \frac{H_{(n/2)}} {(j-i+1)(j-i)}
+\geq  H(n/2) . \left[\frac{n-2}{2} - H_{(n-2)/2} \right] = \Omega(n \log n) $
+
+Assim, $\gamma(n) = \Theta(n \log n)$.
+
+
+De volta a equação original:
+
+$\sum\limits_{i=1}^{n-3} \sum\limits_{j=i+1}^{n-2} \frac{(n - j) - H_{(n - j)}} {(j-i+1)(j-i)} 
+= \alpha(n) - \beta(n) - \gamma(n)
+\leq  \frac{n^2}{2} + \Theta(n \log n)$
+
+\vspace{0.5cm}
+
+{\bf Caso 2b:} Intervalo $[k, l]$ é subintervalo de $[i, j]$.
+
+$E[X_{i,j} X_{k,l}] = \sum\limits_{i=1}^{n-3} \sum\limits_{k=i+1}^{n-2}
+\sum\limits_{l=k+1}^{n-1} \sum\limits_{j=l+1}^{n} \frac{1}{(j-i+1)(j-i)(l-k+1)(l-k)}
+\leq  \sum\limits_{i=1}^{n-3} \sum\limits_{k=i+1}^{n-2}
+\sum\limits_{l=k+1}^{n-1} \sum\limits_{j=l+1}^{n} \frac{1}{(l-k+1)(l-k)(l-k+1)(l-k)}$
+
+$E[X_{i,j} X_{k,l}] \leq\sum\limits_{i=1}^{n-3} \sum\limits_{k=i+1}^{n-2}
+\sum\limits_{l=k+1}^{n-1} \sum\limits_{j=l+1}^{n} \frac{1}{(l-k)^4}
+\leq n \sum\limits_{i=1}^{n-3} \sum\limits_{k=i+1}^{n-2}
+\sum\limits_{l=k+1}^{n-1}  \frac{1}{(l-k)^4} $
+
+$E[X_{i,j} X_{k,l}] \leq n \sum\limits_{i=1}^{n-3} \sum\limits_{k=i+1}^{n-2}
+\left( \displaystyle \int\limits_{k}^{n-2} \! \frac{1}{(l-k)^4} \, \mathrm{d}l \right)
+\leq 3n \sum\limits_{i=1}^{n-3} \sum\limits_{k=i+1}^{n-2} \frac{1}{k^3} $
+
+$E[X_{i,j} X_{k,l}]  \leq 3n \sum\limits_{i=1}^{n-3}
+\left( \displaystyle \int\limits_{i}^{n-3} \! \frac{1}{k^3} \, \mathrm{d}k \right)
+\leq 6n \sum\limits_{i=1}^{n-3} \frac{1}{i^2}
+ \leq 6n \left( 1 + \displaystyle \int\limits_{1}^{n-4} \! \frac{1}{i^2} \, \mathrm{d}i \right)
+ \leq 18n$
+
+\vspace{0.5cm}
+
+{\bf Caso 3:} Intervalos $[i, j]$ e $[k, l]$ se intersectam porém sem compartilhar uma extremidade.
+
+$E[X_{i,j} X_{k,l}] = \sum\limits_{i=1}^{n-3} \sum\limits_{k=i+1}^{n-2}
+\sum\limits_{j=k+1}^{n-1} \sum\limits_{l=j+1}^{n} \frac{1}{(l-i+1)(l-i)(j-i)(l-k-1)}$
+
+Essa soma pode ser escrita como:
+
+$E[X_{i,j} X_{k,l}] = \sum\limits_{i=1}^{n-3} \sum\limits_{j=i+2}^{n-1}
+\sum\limits_{k=i+1}^{j-1} \sum\limits_{l=j+1}^{n} \frac{1}{(l-i+1)(l-i)(j-i)(l-k-1)}$
+
+
+Desde que $j < l$ e $ l - k < j - i$, nós temos:
+
+$E[X_{i,j} X_{k,l}] < \sum\limits_{i=1}^{n-3} \sum\limits_{j=i+2}^{n-1}
+\sum\limits_{k=i+1}^{j-1} \sum\limits_{l=j+1}^{n} \frac{1}{(j-i+1)(j-i)(l-k)(l-k-1)}$
+
+$E[X_{i,j} X_{k,l}] < \sum\limits_{i=1}^{n-3} \sum\limits_{j=i+2}^{n-1}
+\left[ \frac{1}{(j-i+1)(j-i)}  \left( \sum\limits_{k=i+1}^{j-1} \sum\limits_{l=j+1}^{n} \frac{1}{(l-k)(l-k-1)} \right) \right]$
+
+$E[X_{i,j} X_{k,l}] < \sum\limits_{i=1}^{n-3} \sum\limits_{j=i+2}^{n-1}
+\left[ \frac{1}{(j-i+1)(j-i)}  \sum\limits_{k=i+1}^{j-1} \sum\limits_{l=j+1}^{n}  \left(  \frac{1}{l-k-1} - \frac{1}{l-k}  \right) \right]$
+
+$E[X_{i,j} X_{k,l}] < \sum\limits_{i=1}^{n-3} \sum\limits_{j=i+2}^{n-1}
+\left[ \frac{1}{(j-i+1)(j-i)}  \sum\limits_{k=i+1}^{j-1}  \left(  \frac{1}{j-k} - \frac{1}{n-k}  \right) \right]$
+
+$E[X_{i,j} X_{k,l}] < \sum\limits_{i=1}^{n-3} \sum\limits_{j=i+2}^{n-1}
+\frac{H_{n}}{(j-i+1)(j-i)} $
+
+Assim, $E[X_{i,j} X_{k,l}] = O(n \log n)$.
+
+\vspace{0.5cm}
+
+{\bf Caso 4:} Intervalos $[i, j]$ e $[k, l]$ se intersectam com $i = k$.
+
+$E[X_{i,j} X_{k,l}] = \sum\limits_{i=1}^{n-2}
+\sum\limits_{j=i+1}^{n-1} \sum\limits_{l=j+1}^{n} \frac{1}{(l-i+1)(l-i)(j-i)}$
+
+$E[X_{i,j} X_{k,l}] = \sum\limits_{i=1}^{n-2}
+\sum\limits_{j=i+1}^{n-1} \left[ \frac{1}{(j-i)} \sum\limits_{l=j+1}^{n} \frac{1}{(l-i+1)(l-i)} \right]
+\leq \sum\limits_{i=1}^{n-2}
+\sum\limits_{j=i+1}^{n-1} \frac{1}{(j-i)(j-i+1)}$
+
+Então, $E[X_{i,j} X_{k,l}] \leq n - H_{n}$.
+
+\vspace{0.5cm}
+
+{\bf Caso 5:} Intervalos $[i, j]$ e $[k, l]$ se intersectam com $j = k$.
+
+$E[X_{i,j} X_{k,l}] = \sum\limits_{i=1}^{n-2}
+\sum\limits_{j=i+1}^{n-1} \sum\limits_{l=j+1}^{n} \frac{1}{(l-i+1)(l-i)(l-i-1)}
+\leq \sum\limits_{i=1}^{n-2}
+\sum\limits_{j=i+1}^{n-1} \sum\limits_{l=j+1}^{n} \frac{1}{(l-i+1)(l-i)}
+$
+
+$E[X_{i,j} X_{k,l}] \leq \sum\limits_{i=1}^{n-2}
+\sum\limits_{j=i+1}^{n-1} \sum\limits_{l=j+1}^{n} \left( \frac{1}{l-i} - \frac{1}{l-i+1} \right)
+\leq \sum\limits_{i=1}^{n-2}
+\sum\limits_{j=i+1}^{n-1} \frac{1}{j-i+1}
+$
+
+$E[X_{i,j} X_{k,l}] \leq \sum\limits_{i=1}^{n-2} H_{n}$. Então, $E[X_{i,j} X_{k,l}] = O(n \log n)$.
+
+
+{\bf Caso 6:} Intervalos $[i, j]$ e $[k, l]$ se intersectam com $j = l$.
+
+Isso é idêntico ao caso 4. Então, $E[X_{i,j} X_{k,l}] \leq n - H_{n}$.
+
+
+\vspace{0.5cm}
+
+Uma vez que analisamos todos os seis casos estamos prontos para estimar
+$E[X^2]$.
+
+Primeiro, é importante observar que, com exceção do caso 2a, todos os outros
+casos são limitados superiormente por $O(n \log n)$. No caso 2a, em particular,
+$E[X_{i,j} X_{k,l}] = \frac{n^2}{2} + \Theta(n \log n)$. Além disso, pela definição de $E[X^2]$,
+com exceção do caso 1, o resultado de todos os outros casos deve ser multiplicado por 2.
+Assim, $E[X^2] = n^2+ \Theta(n \log n)$.
+
+Lembrando que, da desigualdade de Chebyshev, $Pr\{ |X - E[X]| \geq c E[X] \} \leq \frac{E[X^2] - E[X]^2}{c^2 E[X]^2}$.
+
+Consequentemente, $Pr\{ X \geq c n \} \leq Pr\{ X \geq c (n - H_{n}) \} = \frac{n^2 + \Theta(n \log n) - (n - H_{n})^2}{c^2 (n - H_{n})^2}$.
+
+Assim, $Pr\{ X \geq c n \} \leq \frac{c' \log n}{c^2 n}$ onde $c'$ é uma constante positiva.
+
+
+\end{proof}
 
 
 
@@ -958,22 +1312,11 @@ sequência de pesquisas, acreditamos que nossa abordagem é a melhor escolha.
 
 
 
+\bibliographystyle{plain}
 
+%\bibliography{paper}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+\end{document}
 
 
 
@@ -1309,227 +1652,3 @@ ficam na frente do vetor, podemos achar os .....
 \subsection{Inícios}
 
 
-
-\appendix
-
-
-\section{Proof of Proposition \ref{prop:tail}}
-\begin{proof}
-
-\noindent Chebyshev's inequality states that if $X$ is a random variable with expectation $E[X]$ and variance $Var[X]$,
-then $Pr\{ |X - E[X]| \geq c \} \leq \frac{Var[X]}{c^2}$, for any positive constant $c$ given.
-Considering that, by definition,  $Var[X] = E[X^2] - E[X]^2$, and multiplying $c$ by $E[x]$ in the previous inequality, we have
-$Pr\{ |X - E[X]| \geq c E[X] \} \leq \frac{E[X^2] - E[X]^2}{c^2 E[X]^2}$.
-
-In order to make use of Chebyshev's inequality it is necessary to determine $E[X]^2$ and  $E[X^2]$.
-
-From Proposition 1, it follows that $E[X]^2 = (n - H_{n})^2$.
-
-By definition, $E[X^2] = E [( \sum\limits_{i=1}^{n-1} \sum\limits_{j=i+1}^{n} X_{i,j})^2]$.
-Hence, by the linearity of expectation, $E[X^2] = ( 2 \sum\limits_{i=1}^{n-1} \sum\limits_{j=i+1}^{n}
-\sum\limits_{k=i+1}^{n-1} \sum\limits_{l=k+1}^{n} E[X_{i,j} X_{k,l}] ) +
-( \sum\limits_{i=1}^{n-1} \sum\limits_{j=i+1}^{n} E[(X_{i,j})^2] )$.
-
-
-We proceed now by calculating $E[X^2]$. It can be splitted into six disjoint cases.
-
-In each one of the following cases we assume that the product of every pair  
-of random variables $X_{i,j}$ and $X_{k,l}$  is represented by the intersection
-of two closed intervals $[i,j]$ and $[k,l]$, where $[i,j] = \{p | i \leq p \leq j \}$
-and $[k,l] = \{q | k \leq q \leq l \}$.
-
-Furthermore, by means of an abuse of notation, we assume in each one of the following cases that
-the expression $E[X_{i,j} X_{k,l}]$ denotes $\sum\limits_{i}\sum\limits_{j >i}\sum\limits_{k \geq i}\sum\limits_{l > k} E[X_{i,j} X_{k,l}]$, where $[i,j]$ and $[k,l]$ are pairs of intervals belonging to the related case.
-
-
-{\bf Case 1:} Intervals  $[i, j]$ and $[k, l]$ are identical.
-
-$E[X_{i,j} X_{k,l}] = E[X_{i,j} X_{i,j}] = E[X_{i,j}] = \sum\limits_{i=1}^{n-1} \sum\limits_{j=i+1}^{n}
-\frac{1}{(j-i+1)(j-i)} = n - H_n$
-
-\vspace{0.5cm}
-
-
-{\bf Case 2a:} Intervals  $[i, j]$ and $[k, l]$ are disjoint.
-
-$E[X_{i,j} X_{k,l}] = \sum\limits_{i=1}^{n-3} \sum\limits_{j=i+1}^{n-2}
-\sum\limits_{k=j+1}^{n-1} \sum\limits_{l=k+1}^{n} \frac{1}{(j-i+1)(j-i)(l-k+1)(l-k)} = $
-
-$\sum\limits_{i=1}^{n-3} \sum\limits_{j=i+1}^{n-2}  \left[ \frac{1}{(j-i+1)(j-i)}
-\left( \sum\limits_{k=j+1}^{n-1} \sum\limits_{l=k+1}^{n} \frac{1}{(l-k+1)(l-k)} \right) \right] =  $
-
-$\sum\limits_{i=1}^{n-3} \sum\limits_{j=i+1}^{n-2} \frac{(n - j) - H_{(n - j)}} {(j-i+1)(j-i)} 
-= \alpha(n) - \beta(n) - \gamma(n)$, where
-
-$\alpha(n) = \sum\limits_{i=1}^{n-3} \sum\limits_{j=i+1}^{n-2} \frac{n} {(j-i+1)(j-i)}$,
-$\beta(n) = \sum\limits_{i=1}^{n-3} \sum\limits_{j=i+1}^{n-2} \frac{j} {(j-i+1)(j-i)}$ and 
-$\gamma(n) =  \sum\limits_{i=1}^{n-3} \sum\limits_{j=i+1}^{n-2} \frac{H_{(n - j)}} {(j-i+1)(j-i)}$
-%\sum\limits_{i=1}^{n-3} \sum\limits_{j=i+1}^{n-2} \frac{n-j} {(j-i+1)(j-i)}
-
-Let us first calculate $\alpha(n)$:
-
-$\alpha(n) = \sum\limits_{i=1}^{n-3} \sum\limits_{j=i+1}^{n-2} \frac{n} {(j-i+1)(j-i)}
-= n^2 - 2n - H_{(n-2)}$
-
-From $\beta(n)$ definiton, it follows that:
-
-$\beta(n) = \sum\limits_{i=1}^{n-3} \sum\limits_{j=i+1}^{n-2} \frac{j} {(j-i+1)(j-i)}
-= \sum\limits_{i=1}^{n-3} \left( \sum\limits_{j=i+1}^{n-2} \frac{j}{(j-i)} - \frac{j} {(j-i+1)} \right)$
-
-$\beta(n) = \sum\limits_{i=1}^{n-3} \left[ \left( \frac{i+1}{1} +  \frac{i+2}{2} + \ldots + \frac{n-2}{n-i-2} \right)
-- \left( \frac{i+1}{2} +  \frac{i+2}{3} + \ldots + \frac{n-2}{n-i-1} \right) \right]$
-
-$\beta(n) = \sum\limits_{i=1}^{n-3} \left[
-\frac{i+1}{1}  + \left( \frac{1}{2} +  \frac{1}{3} + \ldots + \frac{1}{n-i-2} \right)
-- \frac{n-2}{n-i-1} \right]
-= \sum\limits_{i=1}^{n-3} \left( i + H_{(n-2)} - \frac{n-i-2}{n-i-1} \right)$
-
-$\beta(n) = \frac{(n-3)(n-2)}{2} + \sum\limits_{i=1}^{n-3} H_{i} - \sum\limits_{i=2}^{n-2} \frac{n-2}{i}$
-
-$\beta(n) = \frac{n^2}{2} - \Theta(n \log n)$.
-
-Similarly, a tight bound can be determined for $\gamma(n)$:
-
-$\gamma(n) =  \sum\limits_{i=1}^{n-3} \sum\limits_{j=i+1}^{n-2} \frac{H_{(n - j)}} {(j-i+1)(j-i)}
-\leq  \sum\limits_{i=1}^{n-3} \sum\limits_{j=i+1}^{n-2} \frac{H_{n}} {(j-i+1)(j-i)}
-\leq  n . H(n) = O(n \log n) $
-
-$\gamma(n) =  \sum\limits_{i=1}^{n-3} \sum\limits_{j=i+1}^{n-2} \frac{H_{(n - j)}} {(j-i+1)(j-i)}
-\geq  \sum\limits_{i=1}^{\frac{n-2}{2} - 1} \sum\limits_{j=i+1}^{\frac{n-2}{2}} \frac{H_{(n/2)}} {(j-i+1)(j-i)}
-\geq  H(n/2) . \left[\frac{n-2}{2} - H_{(n-2)/2} \right] = \Omega(n \log n) $
-
-Therefore, $\gamma(n) = \Theta(n \log n)$.
-
-
-Returning to the original equation:
-
-$\sum\limits_{i=1}^{n-3} \sum\limits_{j=i+1}^{n-2} \frac{(n - j) - H_{(n - j)}} {(j-i+1)(j-i)} 
-= \alpha(n) - \beta(n) - \gamma(n)
-\leq  \frac{n^2}{2} + \Theta(n \log n)$
-
-\vspace{0.5cm}
-
-{\bf Case 2b:} Interval $[k, l]$ is a subinterval of $[i, j]$.
-
-$E[X_{i,j} X_{k,l}] = \sum\limits_{i=1}^{n-3} \sum\limits_{k=i+1}^{n-2}
-\sum\limits_{l=k+1}^{n-1} \sum\limits_{j=l+1}^{n} \frac{1}{(j-i+1)(j-i)(l-k+1)(l-k)}
-\leq  \sum\limits_{i=1}^{n-3} \sum\limits_{k=i+1}^{n-2}
-\sum\limits_{l=k+1}^{n-1} \sum\limits_{j=l+1}^{n} \frac{1}{(l-k+1)(l-k)(l-k+1)(l-k)}$
-
-$E[X_{i,j} X_{k,l}] \leq\sum\limits_{i=1}^{n-3} \sum\limits_{k=i+1}^{n-2}
-\sum\limits_{l=k+1}^{n-1} \sum\limits_{j=l+1}^{n} \frac{1}{(l-k)^4}
-\leq n \sum\limits_{i=1}^{n-3} \sum\limits_{k=i+1}^{n-2}
-\sum\limits_{l=k+1}^{n-1}  \frac{1}{(l-k)^4} $
-
-$E[X_{i,j} X_{k,l}] \leq n \sum\limits_{i=1}^{n-3} \sum\limits_{k=i+1}^{n-2}
-\left( \displaystyle \int\limits_{k}^{n-2} \! \frac{1}{(l-k)^4} \, \mathrm{d}l \right)
-\leq 3n \sum\limits_{i=1}^{n-3} \sum\limits_{k=i+1}^{n-2} \frac{1}{k^3} $
-
-$E[X_{i,j} X_{k,l}]  \leq 3n \sum\limits_{i=1}^{n-3}
-\left( \displaystyle \int\limits_{i}^{n-3} \! \frac{1}{k^3} \, \mathrm{d}k \right)
-\leq 6n \sum\limits_{i=1}^{n-3} \frac{1}{i^2}
- \leq 6n \left( 1 + \displaystyle \int\limits_{1}^{n-4} \! \frac{1}{i^2} \, \mathrm{d}i \right)
- \leq 18n$
-
-\vspace{0.5cm}
-
-{\bf Case 3:} Intersection between intervals $[i, j]$ and $[k, l]$ with no shared extremes.
-
-$E[X_{i,j} X_{k,l}] = \sum\limits_{i=1}^{n-3} \sum\limits_{k=i+1}^{n-2}
-\sum\limits_{j=k+1}^{n-1} \sum\limits_{l=j+1}^{n} \frac{1}{(l-i+1)(l-i)(j-i)(l-k-1)}$
-
-This sum can be writen as:
-
-$E[X_{i,j} X_{k,l}] = \sum\limits_{i=1}^{n-3} \sum\limits_{j=i+2}^{n-1}
-\sum\limits_{k=i+1}^{j-1} \sum\limits_{l=j+1}^{n} \frac{1}{(l-i+1)(l-i)(j-i)(l-k-1)}$
-
-
-Since that $j < l$ and $ l - k < j - i$, we have:
-
-$E[X_{i,j} X_{k,l}] < \sum\limits_{i=1}^{n-3} \sum\limits_{j=i+2}^{n-1}
-\sum\limits_{k=i+1}^{j-1} \sum\limits_{l=j+1}^{n} \frac{1}{(j-i+1)(j-i)(l-k)(l-k-1)}$
-
-$E[X_{i,j} X_{k,l}] < \sum\limits_{i=1}^{n-3} \sum\limits_{j=i+2}^{n-1}
-\left[ \frac{1}{(j-i+1)(j-i)}  \left( \sum\limits_{k=i+1}^{j-1} \sum\limits_{l=j+1}^{n} \frac{1}{(l-k)(l-k-1)} \right) \right]$
-
-$E[X_{i,j} X_{k,l}] < \sum\limits_{i=1}^{n-3} \sum\limits_{j=i+2}^{n-1}
-\left[ \frac{1}{(j-i+1)(j-i)}  \sum\limits_{k=i+1}^{j-1} \sum\limits_{l=j+1}^{n}  \left(  \frac{1}{l-k-1} - \frac{1}{l-k}  \right) \right]$
-
-$E[X_{i,j} X_{k,l}] < \sum\limits_{i=1}^{n-3} \sum\limits_{j=i+2}^{n-1}
-\left[ \frac{1}{(j-i+1)(j-i)}  \sum\limits_{k=i+1}^{j-1}  \left(  \frac{1}{j-k} - \frac{1}{n-k}  \right) \right]$
-
-$E[X_{i,j} X_{k,l}] < \sum\limits_{i=1}^{n-3} \sum\limits_{j=i+2}^{n-1}
-\frac{H_{n}}{(j-i+1)(j-i)} $
-
-Therefore, $E[X_{i,j} X_{k,l}] = O(n \log n)$.
-
-\vspace{0.5cm}
-
-{\bf Case 4:} Intersection between intervals $[i, j]$ and $[k, l]$ with $i = k$.
-
-$E[X_{i,j} X_{k,l}] = \sum\limits_{i=1}^{n-2}
-\sum\limits_{j=i+1}^{n-1} \sum\limits_{l=j+1}^{n} \frac{1}{(l-i+1)(l-i)(j-i)}$
-
-$E[X_{i,j} X_{k,l}] = \sum\limits_{i=1}^{n-2}
-\sum\limits_{j=i+1}^{n-1} \left[ \frac{1}{(j-i)} \sum\limits_{l=j+1}^{n} \frac{1}{(l-i+1)(l-i)} \right]
-\leq \sum\limits_{i=1}^{n-2}
-\sum\limits_{j=i+1}^{n-1} \frac{1}{(j-i)(j-i+1)}$
-
-Hence, $E[X_{i,j} X_{k,l}] \leq n - H_{n}$.
-
-\vspace{0.5cm}
-
-{\bf Case 5:} Intersection between intervals $[i, j]$ and $[k, l]$ with $j = k$.
-
-$E[X_{i,j} X_{k,l}] = \sum\limits_{i=1}^{n-2}
-\sum\limits_{j=i+1}^{n-1} \sum\limits_{l=j+1}^{n} \frac{1}{(l-i+1)(l-i)(l-i-1)}
-\leq \sum\limits_{i=1}^{n-2}
-\sum\limits_{j=i+1}^{n-1} \sum\limits_{l=j+1}^{n} \frac{1}{(l-i+1)(l-i)}
-$
-
-$E[X_{i,j} X_{k,l}] \leq \sum\limits_{i=1}^{n-2}
-\sum\limits_{j=i+1}^{n-1} \sum\limits_{l=j+1}^{n} \left( \frac{1}{l-i} - \frac{1}{l-i+1} \right)
-\leq \sum\limits_{i=1}^{n-2}
-\sum\limits_{j=i+1}^{n-1} \frac{1}{j-i+1}
-$
-
-$E[X_{i,j} X_{k,l}] \leq \sum\limits_{i=1}^{n-2} H_{n}$. Therefore, $E[X_{i,j} X_{k,l}] = O(n \log n)$.
-
-
-{\bf Case 6:} Intersection between intervals $[i, j]$ and $[k, l]$ with $j = l$.
-
-This is identical to case 4. Hence, $E[X_{i,j} X_{k,l}] \leq n - H_{n}$.
-
-
-\vspace{0.5cm}
-
-
-Once that all six cases were analised we are able to estimate $E[X^2]$.
-First, it is important to observe that, with exception the case 2a, all other cases
-are upper bounded by $O(n \log n)$. In the case 2a, in particular,
-$E[X_{i,j} X_{k,l}] = \frac{n^2}{2} + \Theta(n \log n)$. Furthermore, by the definition of $E[X^2]$,
-with exception the case 1, the results of all other cases must be multiplied by 2.
-Therefore, $E[X^2] = n^2+ \Theta(n \log n)$.
-
-Recall that, from Chebyshev's inequality, $Pr\{ |X - E[X]| \geq c E[X] \} \leq \frac{E[X^2] - E[X]^2}{c^2 E[X]^2}$.
-
-Consequently, $Pr\{ X \geq c n \} \leq Pr\{ X \geq c (n - H_{n}) \} = \frac{n^2 + \Theta(n \log n) - (n - H_{n})^2}{c^2 (n - H_{n})^2}$.
-
-Therefore, $Pr\{ X \geq c n \} \leq \frac{c' \log n}{c^2 n}$ where $c'$ is a positive constant.
-
-
-
-
-\end{proof}
-
-
-
-
-
-
-
-\bibliographystyle{plain}
-
-%\bibliography{paper}
-
-\end{document}
