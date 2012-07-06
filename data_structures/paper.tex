@@ -1,6 +1,6 @@
-\documentclass[12pt]{article}
+\documentclass[dissertacao, brazil]{ThesisPUC}
 
-\usepackage[brazilian]{babel}
+%\usepackage[brazilian]{babel}
 \usepackage[utf8]{inputenc}
 
 % This first part of the file is called the PREAMBLE. It includes
@@ -33,24 +33,73 @@
 \newcommand{\col}[1]{\left[\begin{matrix} #1 \end{matrix} \right]}
 \newcommand{\comb}[2]{\binom{#1^2 + #2^2}{#1+#2}}
 
+\autor{Caio Dias Valentim}
+\autorR{Valentim, Caio}
+\orientador{Eduardo Sany Laber}
+\orientadorR{Laber, Eduardo}
+\coorientador{David Sotelo}
+\coorientadorR{Sotelo, David}
+\titulo{Estruturas de Dados para Séries Temporais}
+\subtitulo{}
+\dia{31} \mes{Julho} \ano{2012}
+
+\cidade{Rio de Janeiro}
+\CDD{510}
+\departamento{Informática}
+\programa{Otimização}
+\centro{Departamento de Informática}
+\universidade{Pontifícia Universidade Católica}
+\uni{PUC-Rio}
+
+\banca{
+	\membrodabanca{Guilherme Dias da Fonseca}{Unirio}
+	\membrodabanca{Fabio Porto}{PUC-Rio}
+	\membrodabanca{Raúl Rentéría}{PUC-Rio}
+}
+
+\curriculo{
+}
+
+\agradecimentos{
+	Ao café.
+}
+
+\chaves{
+	\chave{Estruturas de Dados}
+	\chave{Séries Temporais}
+	\chave{Algoritmos}
+}
+
+\resumo{
+	Aqui vai ter um resumo legal.
+}
+
+\chavesuk{
+	\chave{Morse Theory}
+	\chave{Forman Theory}
+	\chave{Computational Topology}
+	\chave{Computational Geometry}
+	\chave{Solid Modeling}
+	\chave{Discrete Mathematics}
+}
+
+\titulouk{
+	Data Structures for Temporal Series
+}
+\resumouk{
+	There will be here a great resume in the future.
+}
+
 
 \begin{document}
-
-\nocite{*}
-
-\title{Estruturas de Dados para Séries Temporais}
-
-\maketitle
 
 \section{Introdução}
 
 O estudo de séries temporais é motivado por aplicações que surgem 
 em diferentes campos do conhecimento tais como medicina, física, metereologia
-and finanças, apenas para citar alguns. Para algumas aplicações envolvendo
+e finanças, apenas para citar alguns. Para algumas aplicações envolvendo
 séries temporais planílias e bancos de dados são suficiente para a análise
-desejada. 
-
-Contudo, existem aplicações em que as séries temporais são realmente grandes,
+desejada. Contudo, existem aplicações em que as séries temporais são realmente grandes,
 como na análise de dados capturados por sensores em milisegundos ou na
 análise de transações no mercado de ações eletrônicas. Para essas
 séries, técnicas tradicionais de armazenamento de dados podem ser inadequadas
@@ -61,15 +110,14 @@ O foco da nossa pesquisa é desenvolver estruturas de dados que permitam
 a identificação/descoberta de certos tipos de eventos em uma coleção
 de séries temporais. Nós estamos interessados em mudanças significativas
 na séries que ocorrem em um intervalo pequeno de tempo. Por exemplo,
-vamos considerar a seguintes perguntas que são feitas por analistas
+vamos considerar as seguintes perguntas que são comumente feitas por analistas
 de mercado:
 
 \begin{itemize}
-\item Ações no mercado financeiro podem ser caracterizadas pelos seus
-preços e volume negociados. Dada uma coleção de séries temporais, cada
-uma contendo o preço e o volume negociado de uma ação, medidas em segundos,
-durante 10 anos, nós queremos responder consultas como: Em quais intervalos
-de tempo de $k$ segundos, a maioria das ações tiveram uma variação de pelo
+\item Ações no mercado financeiro podem ser caracterizadas pelos preços e volumes negociados.
+ Dada uma coleção de séries temporais, cada uma contendo o preço e o volume negociado de uma ação, 
+ medidas em segundos, durante 10 anos, nós queremos responder consultas como: Em quais intervalos
+de tempo de $k$ segundos a maioria das ações teve uma variação de pelo
 menos {\tt \%p} no seu preço e uma mudança de pelo menos {\tt \%v} no volume
 negociado?
 
@@ -79,7 +127,7 @@ ao mesmo setor da indústria) normalmente apresentam uma forte conexão.
 entre o preço de duas ações e então apostar que a razão atual irá
 retornar para a estimada quando ela varia significamente. Para implementar
 essa estratégia consultas como a seguir são importantes: Em quais intervalos
-de tempo de tamanho até $\Delta$ T, a razão entre duas ações variou mais que
+de tempo de tamanho até $\Delta$T, a razão entre duas ações variou mais que
 {\tt \%d}?
 
 \end{itemize}
@@ -91,7 +139,7 @@ Seja $A = (a_1, a_2, \ldots, a_n)$ uma série temporal com $n$ elementos
 e seja um índice de tempo um inteiro do conjunto $\{1, \ldots, n\}$. Nós
 usamos dois números positivos, $t$ e $d$, para capturar variações na série
 $A$ durante um intervalo de tempo. De forma mais precisa, nós dizemos que um
-par de índices $(i,j)$ de $A$ é um evento-$(t,d)$ se $0<j - i \le t$ e $a_j - a_i \ge d$.
+par de índices de tempo $(i,j)$ de $A$ é um evento-$(t,d)$ se $0<j - i \le t$ e $a_j - a_i \ge d$.
 
 Nosso objetivo é criar estruturas de dados para pré-processar/indexar séries temporais
 de forma a responder as seguintes consultas em tempo sublinear e com baixo tempo/espaço
@@ -108,7 +156,7 @@ para o estudo de mudanças rápidas em séries temporais, tendo em vista que
 técnicas desenvolvidas para essas consultas podem ser extendidas para outras
 consultas semelhantes.
 
-Para facilitar a apresentação dos resultados, nós iremos nos concentrar
+Para facilitar a apresentação dos resultados, iremos nos concentrar
 em variações positivas ($d > 0$) nas nossas consultas. Contudo, todas as técnicas
 desenvolvidas aqui também se aplicam para variações negativas.
 
@@ -122,26 +170,26 @@ Para apreciar nossa contribuição é útil primeiro discutir formas
 em pontencial para responder as consultas.
 
 Seja $V$ um vetor de números reais, indexado de $1$ até $n$. Uma Range
-Minimum(Maximum) Query ({\tt RMQ}) sobre $V$, com intervalo $[i,j]$, retorna
+Minimum(Maximum) Query (RMQ) sobre $V$, com intervalo $[i,j]$, retorna
 o índice de $V$ com menor(maior) valor, entre aqueles no intervalo $[i,j]$.
 Esse tipo de consulta é bem estudado pela comunidade de geometria computacional
 \cite{lala}. De fato, existem estruturas de dados de tamanho $O(n)$ que respondem
-consultas {\tt RMQ}s em tempo constante.
+consultas RMQs em tempo constante.
 
 Uma observação crucial é que as consultas $AllPairs(t,d)$ e $Beginnings(t,d)$ podem
-ser modeladas por multiplas consultas $RMQ$s (detalhes na próxima seção). 
-Sendo assim, usando diretamente estruturas de {\tt RMQ}, consegue-se responder ambas consultas
+ser modeladas por multiplas consultas RMQs (detalhes na próxima seção). 
+De forma que, usando diretamente estruturas de RMQ, consegue-se responder ambas consultas
 em tempo $O(n + k)$, onde $k$ é o tamanho da resposta. Essa estratégia é ótima para
 o problema \textit{offline}, onde o tempo de pré-processamento é levado em consideração
 para avaliar o tempo de consulta.
 
 Quando o tempo de pré-processamento não é adicionado a consulta é possível conseguir
 melhores resultados. Por exemplo, para a pesquisa $AllPairs(t,d)$, nós conseguimos
-tempo sublinear armazenando todos os pares ${(i,j)| i < j}$ ordenados de forma crescente
-pelos seus valor-$\Delta$ em uma estrutura de dados que suporte {\tt RMQ}s. Apesar 
-de essa abordagem ser bastante eficiente em termos de tempo de consulta, o espaço
+tempo sublinear armazenando todos os pares $\{(i,j)| i < j\}$ ordenados de forma crescente
+pelos seus valores-$\Delta$ em uma estrutura de dados que suporte RMQ. Apesar 
+dessa abordagem ser bastante eficiente em termos de tempo de consulta, o espaço
 necessário para implementá-la pode ser proibitivo para algumas aplicações reais, pois
-temos que armazenar $\Theta(n)$ pares.
+temos que armazenar $\Omega(n^2)$ pares.
 
 A ideia da nossa abordagem é guardar um conjunto de pares especiais de índices
 e não todos os pares possíveis. Nós dizemos que um par de índices $(i,j)$ é
@@ -159,7 +207,7 @@ onde $f$ é a quantidade de índices distintos que são fins de eventos-$(t, d)$
 Um possível ponto negativo da nossa estratégia é que nossa estrutura de dados pode
 ter espaço quadrático no pior caso. Isso acontece, por exemplo, se a série temporal
 for uma sequência crescente. Contudo, nós argumentamos que isso não é provável de acontecer.
-Primeiro, nós provamos que o número esperado de pares especiais para uma permutação aleatória
+Primeiro, nós provamos que a quantidade esperada de pares especiais para uma permutação aleatória
 de $\{1, \ldots, n\}$ é $O(n)$ com alta probabilidade. Esse resultado é interessante pois o número
 de pares especiais de uma série temporal com valores distintos é igual ao número de pares 
 especiais de permutação de $\{1, \ldots, n\}$ que a série pode ser facilmente mapeada. Além disso,
@@ -169,7 +217,7 @@ o número de pares especiais nunca excedeu $7.5$ vezes do tamanho da série.
 
 \subsection{Trabalhos Relacionados}
 
-Na última década, tivemos uma quatidade significante de esforço 
+Na última década, tivemos uma quantidade significativa de esforço 
 para desenvolver ténicas de mineração de dados para séries
 temporais, com discutido em um recente \textit{survey} por Fu\cite{lala}.
 Um importante subcampo de pesquisa apontado por esse survey questiona
@@ -181,20 +229,9 @@ séries temporais - \textit{data reduction} e \textit{burst detection}, entre ou
 aplicações, são discutidas. O trabalho de Shi e Jaja\cite{lala} apresenta um framework
 para explorar padrões temporais de um conjunto de objetos. As consultas deles são relacionadas
 ao problema de \textit{orthogonal range search} e podem ser usadas para responder questões
-interessantes envolvendo séries temporais, porém, tem um contexto consideravelmente diferente
+interessantes envolvendo séries temporais, porém, têm um contexto consideravelmente diferente
 do nosso.
         
-Como já citado, o problema de Range Mininum (Maximum) Query (RMQ) consiste em pré-processar um dado
-vetor de entrada de forma que a posição do mínimo (máximo) entre dois índices pode
-ser obtida de forma eficiente. O primeiro algoritmo de pré-processamento linear e tempo
-de consulta constante para o problema RMQ foi descoberto por Harel e Tarjan\cite{lala}. 
-O algoritmo, apesar de um grande passo do ponto de vista teórico, era difícil de implementar.
-Depois desse artigo, alguns outros foram publicados propondo ideias mais simples, porém ainda
-complexas do ponto de vista de implementação. O trabalho de Bender et al. \cite{lala} apresentou
-o primeiro algoritmo realmente simples para RMQ. O algoritmo é baseado na conexão entre RMQ e
-o problema de  Longest Common Ancestor (LCA), e tem pré-processamento linear e tempo de consulta
-constante e é relativamente simples de implementar. O trabalho de Fischer e Heun\cite{} melhora
-o algoritmo em Bender at al. reduzindo constantes na memória e tempo.
 
 Finalmente, nosso problema tem alguma semelhança com um problema clássico em geometria computacional -
 \textit{fixed radius near neighbors}. Dado um conjunto de $n$ pontos em um espaço Eucliano de $m$ dimensões
@@ -205,12 +242,70 @@ para gerar todos os pares com distância \textit{não} menor que $d$ ou, como no
 maior que $d_1$ na primeira dimensão e não menor que $d_2$ na segunda.
 
 
+\subsection{RMQ}
+
+Como já citado, o problema de Range Mininum (Maximum) Query (RMQ) consiste em pré-processar um dado
+vetor de entrada de forma que a posição do mínimo (máximo) entre dois índices possa
+ser obtida de forma eficiente. O primeiro algoritmo de pré-processamento linear e tempo
+de consulta constante para o problema RMQ foi descoberto por Harel e Tarjan\cite{lala}. 
+O algoritmo, apesar de um grande passo do ponto de vista teórico, era difícil de implementar.
+Depois desse artigo, alguns outros foram publicados propondo ideias mais simples, porém ainda
+complexas do ponto de vista de implementação. O trabalho de Bender et al. \cite{lala} apresentou
+o primeiro algoritmo realmente simples para RMQ. O algoritmo é baseado na conexão entre RMQ e
+o problema de  Longest Common Ancestor (LCA), e tem pré-processamento linear e tempo de consulta
+constante e é relativamente simples de implementar. O trabalho de Fischer e Heun\cite{} melhora
+o algoritmo em Bender at al. reduzindo constantes na memória e tempo.
+
+Aqui iremos entrar em detalhes de dois algoritmos, que são os usados
+durante o este trabalho. O primeiro, que iremos chamar de RMQSt, utiliza
+tempo e memória $O(n \log n)$ durante o  pré-processamento e responde as consultas
+em tempo constante. Já o segundo, que chamaremos de RMQBucket, responde às consultas
+em tempo $O(\log n)$ porém apresenta tempo e espaço de pré-processamento linear.
+Para facilitar um pouco a notação, abaixo iremos mostrar como fazer a RMQ
+para retornar o valor do menor elemento. As idéias podem ser facilmente adpatadas
+para retornar o índice, ou mesmo o valor ou índice do máximo e não do mínimo.
+
+A RMQSt se basea na seguinte ideia, se conseguirmos ter os valores calculados da
+função $f(i, k)$, que retorna o valor do menor elemento no intervalo $A[i, \ldots, i + 2^k]$,
+para todo $i$ e $k$ aplicavéis. Com isso, podemos responder as consultas $RMQ(i, j)$ comparando
+os valores  retornados por $f(i, k)$ e $f(j - 2^k, k)$ da seguinte forma $RMQ(i, j) = \min\{f(i, k), f(j - 2^k, k)\}$,
+onde $k = \lfloor\log(j - i + 1)\rfloor$. Os valores da função $f$ podem ser calculados com a seguinte definição recursiva:
+$f(i, k) = \min\{f(i, k - 1), f(i + 2^{k-1}, k - 1)\}$. Com o dito, o pré-processamento dessa
+estrutura consiste em montar a tabela com os valores de $f$ e usar essa tabela do jeito descrito para
+responder as consultas.
+
+A segunda RMQ usada nesse trabalho divide o vetor de entrada em blocos de tamanho $\frac{\log n}{2}$,
+depois, iterando sobre todos os elementos, acha o menor de cada bloco e os armazena em um vetor $B$.
+Em seguida o vetor $B$ é pré-processado com o algoritmo anterior, RMQSt. A RMQ criada a partir do 
+vetor $B$ é usada para responder consultas "entre blocos". De forma mais clara, dada uma consulta
+RMQ$(i, j)$ nós descobrimos através de uma conta simples qual é o primeiro bloco $b_i$ e último 
+bloco $b_j$ dentro do intervalo $[i, j]$. Usamos a RMQ criada sobre $B$ para conseguir consultar
+$RMQ(b_i, b_j)$ e achar o menor entre os blocos. Finalmente, se $i$ e $j$ não se encaixam perfeitamente
+dentro de um início e final de bloco, respectivamente, iteramos linearmente entre $i$ o começo do block $b_i$ 
+e entre o final do bloco $b_j$ e $j$. Note que o tempo gasta iterando não é maior que $\log n$, uma vez
+que o tamanho de bloco é $\frac{\log n}{2}$. Juntando isso e o fato de que o menor entre os blocos pode
+ser achado em tempo constante, chegamos a complexidade de consulta de $O(\log n)$. Finalmente,
+basta mostrarmos que o pré-processamento é linear, o que é fácil, uma vez que a principal estrutura
+criada é uma RMQSt sobre um vetor de tamanho $\frac{2n}{\log n}$ o que nos dá um tempo de $O(\frac{2n}{\log n} \times \log(\frac{2n}{\log n}))  = O(n)$
+    
+Um importante ponto a ser notado aqui é o trabalho de Johannes Fischer e Volker Heun\cite{},
+nesse trabalho eles apresentam uma estrutura bastante elegante e eficiente para o problema
+de RMQ. A estrutura é uma evolução do trabalho de Gabow et al.\cite{} e apresenta tanto tempo/espaço
+de pré-processamento linear quanto tempo de consulta constante e é razoavelmente simples de se
+implementar. Não iremos entrar em detalhes do artigo aqui, porém, um ponto a ser chamado atenção é que na seção
+experimental eles comparam os tempos da implementação de quatro estruturas, a saber, a RMQBucket com blocos
+de tamanho $\frac{\log n}{2}$ e com blocos de tamanho $\frac{\log n}{2}$, a estrutura proposta por eles e 
+a estrutura proposta em Gabow et al.. Os resultados mostram que para aplicações práticas com vetores
+de tamanho até $10^8$ o RMQBucket como apresentado aqui é o melhor do ponto de vista de tempo de consulta e pré-processamento
+\footnote{Por limitações de hardware eles não conseguiram testar com valores maiores}. 
+Sendo assim, nossa escolha de usar esse algoritmo durante os experimentos é justificada. 
+
 \subsection{Range Tree}
 \label{rangeTree}
 Uma estrutura Range Tree é uma árvore ordenada que contém uma lista 
 de pontos. Ela permite que todos os pontos dentro de um intervalo sejam
 reportados de forma eficiente. Essa estrutura foi introduzida por Jon Louis 
-Bentley em 1979\cite{lala}. Usualmente elas são usadas para duas ou
+Bentley em 1979\cite{lala}. Usualmente ela é usada para duas ou
 mais dimensões, mas os conceitos que precisamos nesse trabalho são relacionados
 a versão 1D.
 
@@ -224,8 +319,8 @@ de $n$ pontos pode ser criada em tempo $O(n\log n)$ e responde as consultas em t
 $O(\log n + k)$, onde $k$ é o tamanho do conjunto de pontos reportados.
 
 A construção da Range Tree 1D para um conjunto de pontos $P$ de $n$ elementos começa
-ordenando os pontos em $P = \{p_1 \le p_2 \le \ldots \le p_n \}$ de forma crescente.
-Então podemos chamar o seguinte procedimento recursivo {\tt ConstructRangeTree} passando os parâmetro $[1, n]$
+ordenando os pontos em $P = \{p_1 \le p_2 \le \ldots \le p_n \}$ de forma crescente,
+depois chama-se o seguinte procedimento recursivo {\tt ConstructRangeTree} passando os parâmetro $[1, n]$
 para construir adequadamente a árvore.
 
 
@@ -305,13 +400,12 @@ que têm valores menores que $j$.
 
 \section{Conceitos Básicos}
 
-
 Nessa seção nós apresentamos observações/resultados que são úteis para tratar
-tanto a consulta $AllPairs(t, d)$ quanto para o $Beginnings(t, d)$.
+tanto a consulta $AllPairs(t, d)$ quanto a $Beginnings(t, d)$.
 
 Nossa primeira observação é que é fácil encontrar todos os eventos-$(t,d)$ que possuem
 um dado índice $i$ como início. Para isto, nós precisamos de uma estrutura de dados que
-suporte consultas RM(áximo)Q sobre $A$ em tempo constante e que tenha tempo/espaço de pré-processamento linear,
+suporte consultas RM(ax)Q sobre $A$ em tempo constante e que tenha tempo/espaço de pré-processamento linear,
 como discutido na seção de trabalhos relacionados. Com uma estrutura dessas em mãos, nós podemos
 chamar o procedimento {\tt GenEventStart}, apresentado na Figura~\ref{geneventstart}, com parâmetros
 $(i, i + 1, i + t)$. Esse procedimento, quando executado com os parâmetros $(i, low, high)$, gera
@@ -354,6 +448,7 @@ o par $(i, j)$ e explora recursivamente os intervalos $[low, j - 1]$ e $[j + 1, 
 Seja $k_i$ a quantidade de eventos-$(t,d)$ que têm início $i$ e fim no intervalo $[low, high]$.
 O procedimento {\tt GenEventsStart}$(i, low, high)$ gera todos os $k_i$ eventos em tempo $O(2k_i + 1)$.
 \end{prop}
+
 \begin{proof}
 A corretude é trivial. O tempo de execução é proporcional ao número de chamadas recursivas
 executadas. O fluxo de execução pode ser visto como uma árvore binária onde cada nó corresponde
@@ -363,7 +458,7 @@ internos, o número de chamadas recursivas é no máximo $2k_i$.
 \end{proof}
 
 Vamos considerar também a existência de um procedimento análogo, chamado {\tt GenEventsEnd}, que recebe
-como entrada uma tupla $(j, low, high)$ e usa uma RM(ínimo)Q parar gerar todos os eventos-$(t,d)$ que 
+como entrada uma tupla $(j, low, high)$ e usa uma RM(in)Q parar gerar todos os eventos-$(t,d)$ que 
 têm $j$ como final e o ínicio no intervalo $[low, high]$. A implementação do mesmo é análoga ao 
 {\tt GenEventStart} e o tempo de execução é o mesmo.  
 
@@ -394,7 +489,7 @@ Na próxima seção mostramos como gerar os pares especiais de forma eficiente.
 \subsection{Gerando Pares Especiais}
 
 O conjunto $S$ de pares especiais de uma série temporal $A$, de tamanho $n$, pode ser obtido
-em tempo $O(n + |S|)$ chamando-se o pseudo-código apresentado na Figura~\ref{fig:GenSpecialPairs}
+em tempo $O(n + |S|)$ a partir do pseudo-código apresentado na Figura~\ref{fig:GenSpecialPairs}
 com parâmetros $(1, n)$. Primeiro, o procedimento faz uma consulta a estrutura de RM(in)Q para calcular
 em tempo constante o índice $i$ de menor valor no intervalo $[low, high]$ e outra consulta
 para calcular o índice $j$ de maior valor no intervalo $[i + 1, high]$. 
@@ -427,7 +522,7 @@ $[low, high]$ em pelo menos em $1$. Sendo assim, o tempo de execução é $O(n +
 
 \hspace{2cm}  $j \leftarrow RMaxQ(i + 1, high)$
   
-\hspace{2cm} {\bf While} $i < j$ and $a_j - a_i \ge d$
+\hspace{2cm} {\bf While} $i < j$ e $a_j - a_i \ge d$
 
 \hspace{3cm}  Adicine o par $(i, j)$ à lista de pares especiais
 
@@ -457,12 +552,17 @@ $S$ pode ser construido em tempo $O(|S| + n)$.
 
 \section{Estruturas de Dados para Detecção de Variações Rápidas em Séries Temporais - AllPairs}
 
+Nessa seção analisamos estruturas para o problema $AllPairs(t,d)$.
+
 \subsection{AllPairs-Lista}
 
 Uma estratégia simples é armazenar um vetor com $n$ listas $\{L_1, \ldots, L_n\}$ e na lista $L_x$ colocar os valores 
 $\{(1, m_1), (2, m_2), \ldots, (n-1, m_{n-1})\}$, onde $m_i$ é o índice do maior elemento de maior valor do intervalo $[i, \ldots, i + x]$. 
-Cada lista é internamente ordenada de forma decrescente por desvio. 
-Com essa estrutura em memória poderiamos responder uma consulta $(t, d)$ percorrendo e reportando os pares na lista $L_t$ enquanto o valor do par corrente é maior que ou igual a $d$. Essa estratégia responde consultas de forma bastante eficiente, em tempo $O(k + 1)$, onde $k$ é a quantidade de pares reportados e, além disso, é bastante simples de entender e implementar. Por outro lado, acreditamos que o espaço em memória necessário para implementá-la é proibitivo, uma vez é preciso sempre armazenar os $\Omega(n^2)$ pares.  
+Cada lista é internamente ordenada de forma decrescente por desvio. Com essa estrutura em memória poderiamos responder uma consulta $(t, d)$
+ percorrendo e reportando os pares na lista $L_t$ enquanto o desvio do par corrente é maior que ou igual a $d$. Essa estratégia responde 
+ consultas de forma bastante eficiente, em tempo $O(k + 1)$, onde $k$ é a quantidade de pares reportados e, além disso, é bastante simples
+  de entender e implementar. Por outro lado, acreditamos que o espaço em memória necessário para implementá-la é proibitivo, uma vez é preciso
+   sempre armazenar $\Omega(n^2)$ pares.  
 
 \subsection{AllPairs-RMQ}
 
@@ -470,11 +570,10 @@ Como discutido anteriormente, se criamos uma estrutura de RM(in)Q para a série
 de entrada, é possível executar o procedimento {\tt GenEventsStart} com parâmetros
 $(i, i + 1, i + t)$ para gerar todas soluções de uma consulta $(t, d$ que tem como
 início o elemento $i$ da série. Sendo assim, essa estratégia consiste em iterar 
-em todos os possíveis inícios $i$'s e gerar as soluções com esse dado início. 
+em todos os possíveis inícios $i$'s e gerar as soluções para cada início. 
 O conjunto final de soluções é a união dos pares geradados. 
 
-Note que todo pre-processamento necessário é o pré-processamento
-da RMQ e o tempo de execução é $O(k + n)$, onde $k$ é o tamanho da solução.
+Note que todo pré-processamento necessário é o da RMQ e o tempo de execução é $O(k + n)$, onde $k$ é o tamanho da solução.
 Se comparada com a estrutura de listas, essa nova estratégia apresenta uma
 fase de pré-processamento menos custosa, uma vez que podemos usar uma
 estrutura de RMQ com espaço e tempo de pré-processamento linear. Por outro lado,
@@ -487,12 +586,12 @@ melhor equilíbrio entre tempo e espaço de pré-processamento e consulta.
 
 Essa abordagem é baseada no conceito de pares especias apresentado.
 
-\textbf{Pré-processamento.} Primeiro, geraramos o conjunto $S$ de pares especiais da série de entrada $A = (a_1, \ldots, a_n)$,
+\textbf{Pré-processamento.} Primeiro, geramos o conjunto $S$ de pares especiais da série de entrada $A = (a_1, \ldots, a_n)$,
 isso é feito chamando o procedimento~\ref{fig:GenSpecialPairs}. Então a partir de $S$ criamos um vetor $V$ que
-contém os pares em $S$ ordenados de forma crescente por valor-$\Delta$, empates na ordenação são decididos arbitrariamente. 
+contém os pares em $S$ ordenados de forma crescente por valor-$\Delta$, e empates na ordenação são decididos arbitrariamente. 
 Além disso, precisamos de um vetor $M$ onde a posição $i$ guarda o índice do par mais a direita em $V$  com desvio menor ou igual a $i$.
 Repare que é possível construir tanto o vetor $V$ quanto o vetor $M$, a partir de $S$, em tempo $O(|S|)$.
-Finalmente, criamos três estruturas de {\tt RMQ}, a primeira, ${\cal D}$ é criada sobre o vetor $V$ e tem tamanho 
+Finalmente, criamos três estruturas de RMQ, a primeira, ${\cal D}$ é criada sobre o vetor $V$ e tem tamanho 
 $O(|S|)$(foot note) e a utilizamos para responder a seguinte consulta: Dados dois valores $t^*$ e $d^*$, 
 reporte o subconjunto de pares especiais de $S$ com valor-$\Delta$ de até $t^*$ e desvio de ao menos $d^*$. 
 Já as outras duas, ${\cal D}_{min}$ e ${\cal D}_{max}$ têm tamanho $O(n)$ e são usadas para podermos chamar, 
@@ -727,7 +826,7 @@ em tempo $O(\log n + f.(\log f + \log t) + k)$, onde $k$ é o tamanho do conjunt
 $\log f$ na complexidade acima. A ideia principal é criar uma estrutura de RMQ
 para cada lista $L_{i,j}$ e ordenar pares especiais em  $L_{i, j}$ pelo seus fins
 e não por seu desvio. Desta forma, conseguimos trocar a ordenação na fase 2.1 
-uma operação mais rápida de merge. !!! EXPLICAR EM DETALHES?
+uma operação mais rápida de merge. !!! EXPLICAR EM DETALHES, Laber?
 
 \subsubsection{Calculando os $clp$s}
 A Figura~\ref{fig:clp} mostra o pseudo-código do procedimento
@@ -922,22 +1021,22 @@ de 64 bits. O sistema operacional utilizado foi o Ubuntu 10.04 LTS - Lucid Lynx.
 \subsection{RMQs}
 
 De acordo com o artigo~\ref{lala}, a implementação mais eficiente, dentre aquelas
-de pré-processamento linear, para séries de tamanho até $10^6$ é {\tt RMQBucket}.
-Com isso em vista, utilizamos duas essa implementação de {\tt RMQ} e também a estrutura
-{\tt RMQSt} descrita. Nas Figuras~\ref{fig:pre_bucket} e \ref{fig:pre_st} apresentamos experimentos medindo o tempo de pré-processamento
+de pré-processamento linear, para séries de tamanho até $10^6$ é RMQBucket.
+Com isso em vista, utilizamos duas essa implementação de RMQ e também a estrutura
+RMQSt descrita. Nas Figuras~\ref{fig:pre_bucket} e \ref{fig:pre_st} apresentamos experimentos medindo o tempo de pré-processamento
 e consulta de ambas implementações.
 
 Os grafícos foram gerados pré-processando $500$ vetores de tamanhos entre
 $10000$ e $11000$, com um intervalo de $2$ entre dois tamanhos consecutivos.
 Os tempos são apresentados em milisegundos e cada um é a média
 de $1000$ pré-processamentos para o mesmo vetor. Note que o tempo de pré-processamento
-do {\tt RMQBucket} ficou sempre, exceto por \textit{outliers}, entre $[0.22, 0.255]$.
-Já os tepos da {\tt RMQST} ficaram no intervalo $[0.95, 1.3]$, novamente, exceto por \textit{outliers}.
+do RMQBucket ficou sempre, exceto por \textit{outliers}, entre $[0.22, 0.255]$.
+Já os tempos da RMQSt ficaram no intervalo $[0.95, 1.3]$, novamente, exceto por \textit{outliers}.
 
 Em outro experimento nós testamos $200$ séries aleatórias de tamanhos $\{100000, 100005, \ldots, 101000\}$,
-os tempos da {\tt RMQBucket} ficaram entre $[2.85, 3.2]$, já os da {\tt RMQSt} entre $[15,19]$. 
-Além disso, na média, a implementação {\tt RMQBucket} teve pré-processamento cinco vezes mais rápido
-que a {\tt RMQSt} para uma mesma entrada. Nesse experimento, os tempos foram medidos como a média
+os tempos da {\tt RMQBucket} ficaram entre $[2.85, 3.2]$, já os da RMQSt entre $[15,19]$. 
+Além disso, na média, a implementação RMQBucket teve pré-processamento cinco vezes mais rápido
+que a RMQSt para uma mesma entrada. Nesse experimento, os tempos foram medidos como a média
 dos tempo entre $100$ execuções.
 
 Finalmente, na Tabela~\ref{tab:pre_series}, mostramos os tempos para pré-processar cada uma das seis
@@ -1147,7 +1246,7 @@ $\sum\limits_{i=1}^{n-3} \sum\limits_{j=i+1}^{n-2} \frac{(n - j) - H_{(n - j)}} 
 = \alpha(n) - \beta(n) - \gamma(n)$, onde
 
 $\alpha(n) = \sum\limits_{i=1}^{n-3} \sum\limits_{j=i+1}^{n-2} \frac{n} {(j-i+1)(j-i)}$,
-$\beta(n) = \sum\limits_{i=1}^{n-3} \sum\limits_{j=i+1}^{n-2} \frac{j} {(j-i+1)(j-i)}$ and 
+$\beta(n) = \sum\limits_{i=1}^{n-3} \sum\limits_{j=i+1}^{n-2} \frac{j} {(j-i+1)(j-i)}$ e 
 $\gamma(n) =  \sum\limits_{i=1}^{n-3} \sum\limits_{j=i+1}^{n-2} \frac{H_{(n - j)}} {(j-i+1)(j-i)}$
 %\sum\limits_{i=1}^{n-3} \sum\limits_{j=i+1}^{n-2} \frac{n-j} {(j-i+1)(j-i)}
 
